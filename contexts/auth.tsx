@@ -1,32 +1,40 @@
 "use client";
 
-import { createContext, useContext, useState, PropsWithChildren } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
 
-
 type UserAuthType = {
-    user: object,
+  currentUser: any
 };
 
-export const UserAuthContext = createContext<UserAuthType | undefined>(undefined);
+const UserAuthContext = createContext<UserAuthType | undefined>(
+  undefined
+);
 
-export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
-    const [user, setUser] = useState({});
+export const AuthProvider = ({ children }: { children : React.ReactNode}) => { 
+  const [currentUser, setCurrentUser] = useState({});
 
+  useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            setUser(user);
-        } else {
-            setUser({});
-        }
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser({});
+      }
     });
+  }, []);
 
-    return (
-        <UserAuthContext.Provider value={{ user }}>
-            {children}
-        </UserAuthContext.Provider>
-    );
+  return (
+    <UserAuthContext.Provider value={{ currentUser }}>
+      {children}
+    </UserAuthContext.Provider>
+  );
 };
 
 export const useAuthContext = () => useContext(UserAuthContext);
