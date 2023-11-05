@@ -1,26 +1,140 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
+import { cn } from "@/lib/utils";
+import { Icons } from "@/components/icons";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useToast } from "./ui/use-toast";
+import { useAuthContext } from "@/contexts/auth";
+
+import { auth } from "@/firebase";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
+type UserCredentials = {
+  email: string;
+  password: string;
+  cpassword: string;
+};
+
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [user, setUser] = React.useState<UserCredentials>({
+    email: "",
+    password: "",
+    cpassword: "",
+  });
+  const [setCurrentUser] = useAuthContext();
+
+  const pathname = usePathname();
+  const { toast } = useToast();
+  const router = useRouter();
 
   async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
-    setIsLoading(true)
+    event.preventDefault();
+    setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+    try {
+      if (pathname === "/register") {
+        await handleSignUp();
+      } else {
+        await handleLogin();
+      }
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  const handleLoginWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider);
+  };
+
+  const handleSignUp = async () => {
+    // checking if passwords match
+    if (user.password !== user.cpassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    } else if (user.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+    createUserWithEmailAndPassword(auth, user.email, user.password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+
+        if (user) {
+          // setCurrentUser(user);
+
+          toast({
+            title: "Success",
+            description: "Account created successfully",
+            variant: "default",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("error", errorCode, errorMessage);
+      });
+  };
+
+  const handleLogin = async () => {
+    signInWithEmailAndPassword(auth, user.email, user.password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        
+        if (user) {
+          // setCurrentUser(user);
+
+          toast({
+            title: "Success",
+            description: "Logged in successfully",
+            variant: "default",
+          });
+
+          router.push("/");
+        }
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("error", errorCode, errorMessage);
+
+        toast({
+          title: "Error",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setUser((prevState) => ({ ...prevState, [id]: value }));
+  };
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -38,13 +152,45 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               autoComplete="email"
               autoCorrect="off"
               disabled={isLoading}
+              value={user.email}
+              onChange={handleOnChange}
             />
           </div>
+          <div className="grid gap-1">
+            <Label className="sr-only" htmlFor="password">
+              Password
+            </Label>
+            <Input
+              id="password"
+              placeholder="Password"
+              type="password"
+              disabled={isLoading}
+              value={user.password}
+              onChange={handleOnChange}
+            />
+          </div>
+
+          {pathname === "/register" && (
+            <div className="grid gap-1">
+              <Label className="sr-only" htmlFor="cpassword">
+                Confirm Password
+              </Label>
+              <Input
+                id="cpassword"
+                placeholder="Confirm Password"
+                type="password"
+                disabled={isLoading}
+                value={user.cpassword}
+                onChange={handleOnChange}
+              />
+            </div>
+          )}
+
           <Button disabled={isLoading}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Sign In with Email
+            {pathname === "/register" ? "Register" : "Login"}
           </Button>
         </div>
       </form>
@@ -58,14 +204,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </span>
         </div>
       </div>
-      <Button variant="outline" type="button" disabled={isLoading}>
+      <Button
+        variant="outline"
+        type="button"
+        disabled={isLoading}
+        onClick={handleLoginWithGoogle}
+      >
         {isLoading ? (
           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Icons.gitHub className="mr-2 h-4 w-4" />
+          <Icons.google className="mr-2 h-4 w-4" />
         )}{" "}
-        Github
+        Google
       </Button>
     </div>
-  )
+  );
 }

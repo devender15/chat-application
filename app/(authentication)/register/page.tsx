@@ -5,7 +5,7 @@ import Link from "next/link"
 import { UserAuthForm } from "@/components/user-auth-form"
 
 export const metadata: Metadata = {
-  title: "Login",
+  title: "Create new account",
 }
 
 export default function AuthenticationPage() {
@@ -29,15 +29,15 @@ export default function AuthenticationPage() {
       </div>
       <div className="container relative hidden h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <Link
-          href="/register"
+          href="/login"
           className="absolute right-4 top-4 md:right-8 md:top-8"
         >
-          Register
+          Login
         </Link>
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
-        <div className="absolute inset-0 bg-zinc-900 min-h-full">
+          <div className="absolute inset-0 bg-zinc-900 min-h-full">
             <Image
-              src="/assets/images/c.jpg"
+              src="/assets/images/phone.jpg"
               width={1280}
               height={843}
               alt="Authentication"
@@ -50,9 +50,9 @@ export default function AuthenticationPage() {
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
-                &ldquo;We can bring positive energy into our daily lives by smiling more, talking to strangers in line, replacing handshakes with hugs, and calling our friends just to tell them we love them.&rdquo;
+                &ldquo;There is no pleasure to me without communication: there is not so much as a sprightly thought comes into my mind that it does not grieve me to have produced alone, and that I have no one to tell it to.&rdquo;
               </p>
-              <footer className="text-sm">Dan Gilbert</footer>
+              <footer className="text-sm">Michel de Montaigne, French Philosopher</footer>
             </blockquote>
           </div>
         </div>
@@ -60,10 +60,10 @@ export default function AuthenticationPage() {
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
             <div className="flex flex-col space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight">
-                Login to your account
+                Create an account
               </h1>
               <p className="text-sm text-muted-foreground">
-                Enter your credentials below to login
+                Enter your details below to create your account
               </p>
             </div>
             <UserAuthForm />

@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import {
@@ -21,18 +25,25 @@ export default function Navbar() {
                 <NavigationMenuContent>
                   <ul className="grid w-[200px] gap-3 p-4">
                     <li>
-                      <Button
-                        variant="secondary"
-                        className="w-full justify-start"
-                      >
-                        Chat
-                      </Button>
+                      <Link href="/chat">
+                        <Button
+                          variant="secondary"
+                          className="w-full justify-start"
+                        >
+                          Chat
+                        </Button>
+                      </Link>
                     </li>
 
                     <li>
-                      <Button variant="ghost" className="w-full justify-start">
-                        Video Call
-                      </Button>
+                      <Link href="/video">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                        >
+                          Video Call
+                        </Button>
+                      </Link>
                     </li>
                   </ul>
                 </NavigationMenuContent>
