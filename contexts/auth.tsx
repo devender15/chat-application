@@ -11,13 +11,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase";
 import { User as FirebaseUser } from "firebase/auth";
 
-type UserAuthType = [
-  FirebaseUser | null,
-  Dispatch<React.SetStateAction<FirebaseUser | null>>
-]
+import { UserAuthContextType } from "@/types";
 
 
-const UserAuthContext = createContext<UserAuthType>([null, () => {}]);
+const UserAuthContext = createContext<UserAuthContextType>([null, () => {}]);
 
 export const AuthProvider = ({ children }: { children : React.ReactNode}) => { 
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);

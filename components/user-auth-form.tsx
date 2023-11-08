@@ -20,6 +20,9 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
+import { UserAuthContextType } from "@/types";
+
+
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 type UserCredentials = {
@@ -35,7 +38,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     password: "",
     cpassword: "",
   });
-  const [setCurrentUser] = useAuthContext();
+  const [currentUser, setCurrentUser] = useAuthContext() as UserAuthContextType;
 
   const pathname = usePathname();
   const { toast } = useToast();
@@ -85,13 +88,16 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         const user = userCredential.user;
 
         if (user) {
-          // setCurrentUser(user);
+          setCurrentUser(user);
 
           toast({
             title: "Success",
             description: "Account created successfully",
             variant: "default",
           });
+
+          // redirecting to the homepage
+          router.push("/");
         }
       })
       .catch((error) => {
@@ -107,7 +113,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         const user = userCredential.user;
         
         if (user) {
-          // setCurrentUser(user);
+          setCurrentUser(user);
 
           toast({
             title: "Success",
@@ -115,6 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             variant: "default",
           });
 
+          // redirecting to the homepage
           router.push("/");
         }
       })
