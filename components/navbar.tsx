@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import { useToast } from "./ui/use-toast";
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import {
@@ -12,7 +14,31 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
+import { auth } from "@/firebase";
+import { signOut } from "firebase/auth";
+
+
+
 export default function Navbar() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  // ---- Functions
+  const handleLogOut = () => {
+    signOut(auth)
+      .then(() => {
+        router.push("/login");
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "Failed to logout!.",
+        });
+        console.log("Error signing out: ", error);
+      });
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background h-16 px-10">
       <nav className="w-full h-full flex justify-between items-center">
@@ -52,7 +78,9 @@ export default function Navbar() {
           </NavigationMenu>
         </div>
         <div className="flex items-center gap-x-4">
-          <Button variant="default">Sign Out</Button>
+          <Button variant="default" onClick={handleLogOut}>
+            Log Out
+          </Button>
           <ModeToggle />
         </div>
       </nav>
