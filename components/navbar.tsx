@@ -16,8 +16,7 @@ import {
 
 import { auth } from "@/firebase";
 import { signOut } from "firebase/auth";
-
-
+import { StatusIndicator } from "./status-indicator";
 
 export default function Navbar() {
   const { toast } = useToast();
@@ -75,6 +74,8 @@ export default function Navbar() {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
+
+          <StatusIndicator />
         </div>
         <div className="flex items-center gap-x-4">
           <Button variant="default" onClick={handleLogOut}>
