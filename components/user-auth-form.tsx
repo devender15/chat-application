@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
@@ -42,7 +42,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   const pathname = usePathname();
   const { toast } = useToast();
-  const router = useRouter();
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
@@ -97,7 +96,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           });
 
           // redirecting to the homepage
-          router.push("/");
+          redirect("/");
         }
       })
       .catch((error) => {
@@ -122,7 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           });
 
           // redirecting to the homepage
-          router.push("/");
+          redirect("/");
         }
       })
       .catch((error) => {

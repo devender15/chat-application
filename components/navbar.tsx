@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { useToast } from "./ui/use-toast";
 import { ModeToggle } from "./mode-toggle";
@@ -20,14 +20,13 @@ import { signOut } from "firebase/auth";
 
 
 export default function Navbar() {
-  const router = useRouter();
   const { toast } = useToast();
 
   // ---- Functions
   const handleLogOut = () => {
     signOut(auth)
       .then(() => {
-        router.push("/login");
+        redirect("/login");
       })
       .catch((error) => {
         toast({
