@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/auth";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SocketContextProvider } from "@/contexts/socket";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,17 +19,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system">
-          <AuthProvider>
             <SocketContextProvider>
             {children}
             </SocketContextProvider>
-          </AuthProvider>
         </ThemeProvider>
         <Toaster />
       </body>
     </html>
+    </ClerkProvider>
   );
 }

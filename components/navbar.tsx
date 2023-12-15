@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { useToast } from "./ui/use-toast";
 import { ModeToggle } from "./mode-toggle";
@@ -14,8 +13,6 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-import { auth } from "@/firebase";
-import { signOut } from "firebase/auth";
 import { StatusIndicator } from "./status-indicator";
 
 export default function Navbar() {
@@ -23,18 +20,7 @@ export default function Navbar() {
 
   // ---- Functions
   const handleLogOut = () => {
-    signOut(auth)
-      .then(() => {
-        redirect("/login");
-      })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "Failed to logout!.",
-        });
-        console.log("Error signing out: ", error);
-      });
+
   };
 
   return (
