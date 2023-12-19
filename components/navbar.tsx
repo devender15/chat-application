@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 
-import { useToast } from "./ui/use-toast";
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import {
@@ -15,13 +14,11 @@ import {
 
 import { StatusIndicator } from "./status-indicator";
 
+import { UserButton } from "@clerk/nextjs";
+
 export default function Navbar() {
-  const { toast } = useToast();
 
-  // ---- Functions
-  const handleLogOut = () => {
 
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background h-16 px-10">
@@ -64,9 +61,7 @@ export default function Navbar() {
           <StatusIndicator />
         </div>
         <div className="flex items-center gap-x-4">
-          <Button variant="default" onClick={handleLogOut}>
-            Log Out
-          </Button>
+          <UserButton afterSignOutUrl="/sign-in" />
           <ModeToggle />
         </div>
       </nav>
