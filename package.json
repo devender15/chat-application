@@ -13,14 +13,16 @@
   "dependencies": {
     "@clerk/nextjs": "^4.28.1",
     "@hookform/resolvers": "^3.3.2",
-    "@prisma/client": "^5.7.0",
+    "@prisma/client": "^5.7.1",
     "@radix-ui/react-context-menu": "^2.1.5",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-navigation-menu": "^1.1.4",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@uploadthing/react": "^6.0.2",
+    "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.291.0",
@@ -46,7 +48,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.1",
     "postcss": "^8",
-    "prisma": "^5.7.0",
+    "prisma": "^5.7.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
