@@ -24,7 +24,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background h-16 px-10">
       <nav className="w-full h-full flex justify-between items-center">
         <div className="flex items-center gap-x-4">
-          <h1 className="text-2xl font-semibold">Realtime Chat</h1>
+          <h1 className="text-2xl font-semibold">socialhope</h1>
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
