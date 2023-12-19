@@ -17,9 +17,35 @@ model Profile {
   email String @db.Text
 
   groups Group[]
+  member Member[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+enum MemberRole {
+  ADMIN
+  GUEST
+}
+
+model Member {
+  id String @id @default(uuid())
+  role MemberRole @default(GUEST)
+
+  profileId String
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  message Message[]
+  directMessages DirectMessage[]
+
+  conversationsInitiated Conversation[] @relation("MemberOne")
+  conversationReceived Conversation[] @relation("MemberTwo")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([profileId])
 }
 
 model Group {
@@ -34,4 +60,59 @@ model Group {
   updatedAt DateTime @updatedAt
 
   @@index([profileId])
+}
+
+model Message {
+  id String @id @default(uuid())
+  content String @db.Text
+
+  fileUrl String? @db.Text
+
+  memberId String
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId])
+}
+
+model Conversation {
+  id String @id @default(uuid())
+
+  memberOneId String
+  memberOne Member @relation("MemberOne", fields: [memberOneId], references: [id], onDelete: Cascade)
+
+  memberTwoId String
+  memberTwo Member @relation("MemberTwo", fields: [memberTwoId], references: [id], onDelete: Cascade)
+
+  directMessages DirectMessage[]
+
+  @@index([memberOneId])
+  @@index([memberTwoId])
+
+  @@unique([memberOneId, memberTwoId])
+
+}
+
+model DirectMessage {
+  id String @id @default(uuid())
+  content String @db.Text
+  fileUrl String @db.Text
+
+  memberId String
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deleted Boolean @default(false)
+
+  @@index([memberId])
+  @@index([conversationId])
 }
