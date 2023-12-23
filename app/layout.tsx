@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Chat App",
+  title: "socialhope | A chat app",
   description: "A chat app built with Next.js and Socket.io",
 };
 

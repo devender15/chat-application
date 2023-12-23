@@ -4,7 +4,7 @@ import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
 export const metadata: Metadata = {
-  title: "Chat App",
+  title: "socialhope | A chat app",
   description: "A chat app built with Next.js and Socket.io",
 };
 
@@ -20,7 +20,7 @@ export default function RootLayout({
         <div className="basis-[20%] h-full">
           <Sidebar />
         </div>
-        <div className="basis-[80%] h-full">{children}</div>
+        <div className="basis-[80%] h-full bg-gray-100 dark:bg-gray-900 p-2">{children}</div>
       </main>
     </>
   );
