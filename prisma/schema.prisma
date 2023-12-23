@@ -38,10 +38,14 @@ model Member {
 
   message Message[]
   directMessages DirectMessage[]
+  friends Friend[]
 
   conversationsInitiated Conversation[] @relation("MemberOne")
   conversationReceived Conversation[] @relation("MemberTwo")
-  
+
+  // now storing all the friends of this user in a single field
+  friendsList Friend[] @relation("Friendship")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -90,7 +94,6 @@ model Conversation {
 
   directMessages DirectMessage[]
 
-  @@index([memberOneId])
   @@index([memberTwoId])
 
   @@unique([memberOneId, memberTwoId])
@@ -115,4 +118,18 @@ model DirectMessage {
 
   @@index([memberId])
   @@index([conversationId])
+}
+
+model Friend {
+  id String @id @default(uuid())
+
+  userId String
+  member Member @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  friends Member[] @relation("Friendship")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
