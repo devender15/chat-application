@@ -6,10 +6,10 @@ import { redirect } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { useToast } from "./ui/use-toast";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { useToast } from "../ui/use-toast";
 import { useAuthContext } from "@/contexts/auth";
 
 import { auth } from "@/firebase";

@@ -16,18 +16,18 @@ type SocketContextProviderType = {
 type SocketContextType = {
   socket: any | null;
   isConnected: boolean;
-}
-
+};
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
 });
 
-export function SocketContextProvider({ children }: SocketContextProviderType) {
-  const [socket, setSocket] =  useState(null);
+export function SocketContextProvider({
+  children,
+}: SocketContextProviderType) {
+  const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-
 
   useEffect(() => {
     const socketInstance = new (ClientIO as any)(process.env.NEXT_PUBLIC_URL!, {
@@ -35,10 +35,11 @@ export function SocketContextProvider({ children }: SocketContextProviderType) {
       addTrailingSlash: false,
     });
 
-
     socketInstance.on("connect", () => {
       setIsConnected(true);
     });
+
+    socketInstance.emit("storeSocketId", "abc");
 
     socketInstance.on("disconnect", () => {
       setIsConnected(false);
@@ -49,7 +50,6 @@ export function SocketContextProvider({ children }: SocketContextProviderType) {
     return () => {
       socketInstance.disconnect();
     };
-
   }, []);
 
   return (
@@ -62,9 +62,9 @@ export function SocketContextProvider({ children }: SocketContextProviderType) {
 export function useSocket() {
   const context = useContext(SocketContext);
 
-  if(context === undefined) {
+  if (context === undefined) {
     throw new Error("useSocket must be used within a SocketContextProvider");
   }
 
-    return context;
+  return context;
 }

@@ -1,15 +1,19 @@
 import { db } from "./db";
 
+export const getOrCreateConversation = async (
+  memberOneId: string,
+  memberTwoId: string
+) => {
+  let conversation =
+    (await findConversation(memberOneId, memberTwoId)) ||
+    (await findConversation(memberTwoId, memberOneId));
 
-export const getOrCreateConversation = async (memberOneId: string, memberTwoId: string) => {
-    let conversation = await findConversation(memberOneId, memberTwoId) || await findConversation(memberTwoId, memberOneId);
+  if (!conversation) {
+    conversation = await createNewConversation(memberOneId, memberTwoId);
+  }
 
-    if(!conversation) {
-        conversation = await createNewConversation(memberOneId, memberTwoId);
-    }
-
-    return conversation;
-}
+  return conversation;
+};
 
 const findConversation = async (memberOneId: string, memberTwoId: string) => {
   try {
@@ -30,14 +34,15 @@ const findConversation = async (memberOneId: string, memberTwoId: string) => {
             profile: true,
           },
         },
-        memberTwo: {
-          include: {
-            profile: true,
-          },
-        },
+        // memberTwo: {
+        //   include: {
+        //     profile: true,
+        //   },
+        // },
       },
     });
-  } catch {
+  } catch (err) {
+    console.log(err);
     return null;
   }
 };
@@ -58,14 +63,15 @@ const createNewConversation = async (
             profile: true,
           },
         },
-        memberTwo: {
-          include: {
-            profile: true,
-          },
-        },
+        // memberTwo: {
+        //   include: {
+        //     profile: true,
+        //   },
+        // },
       },
     });
-  } catch {
+  } catch (err) {
+    console.log(err);
     return null;
   }
 };
