@@ -39,8 +39,6 @@ export function SocketContextProvider({
       setIsConnected(true);
     });
 
-    socketInstance.emit("storeSocketId", "abc");
-
     socketInstance.on("disconnect", () => {
       setIsConnected(false);
     });

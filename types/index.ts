@@ -1,4 +1,3 @@
-import { type Dispatch } from "react";
 import { Server as NetServer, Socket } from "net";
 import { NextApiResponse } from "next";
 import { Server as SocketIOServer } from "socket.io";
@@ -10,3 +9,20 @@ export type NextApiResponseServerIo = NextApiResponse & {
     };
   }
 }
+
+export type FriendRequest = {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  createdAt: string;
+  updatedAt: string;
+  sender: {
+    id: string;
+    userId: string;
+    name: string;
+    imageUrl: string;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};

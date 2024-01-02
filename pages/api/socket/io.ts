@@ -12,8 +12,6 @@ export const config = {
   },
 };
 
-const connectedUsers: Record<string, string> = {};
-
 const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
   if (!res.socket.server.io) {
     const path = "/api/socket/io";
@@ -28,61 +26,154 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
     });
     res.socket.server.io = io;
 
-    io.on("connection", (socket) => {
+    io.on("connection", async (socket) => {
       console.log("a user connected");
 
-      socket.on("sendFriendRequest", (data) => {
-        console.log("sendFriendRequest", data);
+      socket.on("joinRoom", (data) => {
+        const { userId } = data;
 
-        socket.on("sendFriendRequest", async (data) => {
-          console.log("sendFriendRequest", data);
+        // add the user to the room
+        socket.join(userId);
 
+        socket.emit("userJoinedRoom", {
+          message: "You have joined the global room",
+          usersInRoom: io.sockets.adapter.rooms,
+        });
+
+        // checking the users in the room
+        // const { rooms } = io.sockets.adapter;
+        // console.log(rooms);
+      });
+
+      socket.on(
+        "sendFriendRequest",
+        async (data: { senderId: string; receiverEmail: string }) => {
           const { senderId, receiverEmail } = data;
 
-          const reciever = await db.profile.findFirst({
+          const sender = await db.profile.findFirst({
             where: {
-              email: receiverEmail
+              userId: senderId,
             },
             select: {
-              id: true
-            }
+              id: true,
+              email: true,
+            },
           });
 
-          const receiverId = reciever?.id;
+          if (!sender) {
+            io.to(senderId).emit("friendRequestError", {
+              message: "You are not logged in",
+            });
 
-          if(!receiverId) {
             return;
           }
 
-          if(connectedUsers[receiverId]) {
-            io.to(connectedUsers[receiverId]).emit("receiveFriendRequest", { senderId });
+          const reciever = await db.profile.findFirst({
+            where: {
+              email: receiverEmail,
+            },
+            select: {
+              userId: true,
+              id: true,
+            },
+          });
+
+          if (!reciever) {
+            io.to(senderId).emit("friendRequestError", {
+              message: "User not found",
+            });
+
+            return;
           }
 
-        })
 
-      })
+          // check if a request has already been sent
+          const requestExists = await db.friendRequest.findFirst({
+            where: {
+              senderId: sender.id,
+              receiverId: reciever.id,
+            },
+          });
 
+          if (requestExists) {
+            io.to(senderId).emit("friendRequestError", {
+              message: "Request already sent",
+            });
+
+            return;
+          }
+
+
+          const receiverId = reciever.userId;
+
+          if (!receiverId) {
+            // find the user's socket id from the room
+            io.to(senderId).emit("friendRequestError", {
+              message: "User not found",
+            });
+
+            return;
+          }
+
+          const { rooms } = io.sockets.adapter;
+
+          const idSet = rooms.get(receiverId);
+
+          if (!idSet) {
+            io.to(senderId).emit("friendRequestError", {
+              message: "This user is not online",
+            });
+
+            return;
+          }
+
+          const receiverSocketId = rooms.get(receiverId)
+            ? Array.from(idSet.values())[0]
+            : null;
+
+          if (!receiverSocketId) {
+            io.to(senderId).emit("friendRequestError", {
+              message: "This user is not online",
+            });
+
+            return;
+          }
+
+          // emit the friend request
+          io.to(receiverSocketId).emit("friendRequest", { senderEmail: sender.email });
+
+          // saving the friend request to the database
+          await db.friendRequest.create({
+            data: {
+              senderId: sender.id,
+              receiverId: reciever.id,
+            },
+          });
+        }
+      );
 
       socket.on("acceptFriendRequest", (data) => {
         const { senderId, receiverId } = data;
 
         // emit the acceptance message
-        if(connectedUsers[senderId]) {
-          io.to(connectedUsers[senderId]).emit("friendRequestAccepted", { receiverId });
-        }
-      })
+        // if(connectedUsers[senderId]) {
+        //   io.to(connectedUsers[senderId]).emit("friendRequestAccepted", { receiverId });
+        // }
+      });
 
-      // store the user's socket connection
-      socket.on("storeSocketId", (userId) => {
-        console.log(userId);
-        console.log("user saved!");
-        connectedUsers[userId] = socket.id;
-      })
+      socket.on("declineFriendRequest", (data) => {
+        const { senderId, receiverId } = data;
 
-      console.log(connectedUsers);
-
+        // emit the decline message
+        // if(connectedUsers[senderId]) {
+        //   io.to(connectedUsers[senderId]).emit("friendRequestDeclined", { receiverId });
+        // }
+      });
       socket.on("disconnect", () => {
         console.log("user disconnected");
+
+        // clear the room
+        // socket.leave(userId);
       });
     });
   } else {

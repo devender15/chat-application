@@ -13,10 +13,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Check, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -26,81 +24,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    name: "Hrithik Roshan",
-    email: "ihrithik@yahoo.com",
-  },
-];
+import { type FriendRequest } from "@/types";
 
-export type Payment = {
-  id: string;
-  name: string;
-  email: string;
-};
 
-export const columns: ColumnDef<Payment>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-  },
-  {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Action</div>,
-    cell: () => (<div className="flex items-center justify-end gap-x-2">
-        <Button size="icon" variant="ghost">
-            <Check className="h-4 w-4" color="green" />
-        </Button>
 
-        <Button size="icon" variant="ghost">
-            <X className="h-4 w-4" color="red" />
-        </Button>
-    </div>)
-  }
-];
 
-export function DataTableDemo({ type }: { type: string }) {
+type DataTableProps = {
+  type: "send" | "receive";
+  columns: ColumnDef<FriendRequest>[];
+  data: FriendRequest[];
+}
+
+export function DataTable({ type, columns, data }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -129,7 +64,7 @@ export function DataTableDemo({ type }: { type: string }) {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -137,7 +72,7 @@ export function DataTableDemo({ type }: { type: string }) {
               <TableRow key={headerGroup.id}  className="!bg-white dark:!bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}  className="!bg-white dark:!bg-transparent">
+                    <TableHead key={header.id}  className="!bg-white dark:!bg-transparent text-center">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

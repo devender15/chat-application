@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SocketContextProvider } from "@/contexts/socket";
+import { StateContextProvider } from "@/contexts/state-context";
 import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,16 +21,16 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-    <html lang="en">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system">
+      <html lang="en">
+        <body className={inter.className}>
+          <ThemeProvider attribute="class" defaultTheme="system">
             <SocketContextProvider>
-            {children}
+              <StateContextProvider>{children}</StateContextProvider>
             </SocketContextProvider>
-        </ThemeProvider>
-        <Toaster />
-      </body>
-    </html>
+          </ThemeProvider>
+          <Toaster />
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

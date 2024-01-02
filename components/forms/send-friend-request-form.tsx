@@ -13,7 +13,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 
 import { useSocket } from "@/contexts/socket";
-
+import { useStateContext } from "@/contexts/state-context";
+import { useUser } from "@clerk/nextjs";
+import { handleFetchFriendRequests } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -23,6 +25,8 @@ export default function SendFriendRequestForm() {
   const { toast } = useToast();
 
   const { socket } = useSocket();
+  const { user } = useUser();
+  const { setFriendRequests } = useStateContext();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -34,10 +38,29 @@ export default function SendFriendRequestForm() {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (value: z.infer<typeof formSchema>) => {
-    
-
     // send friend request
-    socket.emit("sendFriendRequest", value.email);
+    socket.emit("sendFriendRequest", {
+      senderId: user?.id,
+      receiverEmail: value.email,
+    });
+
+    socket.on("friendRequestError", (data: { message: string }) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: data.message,
+      });
+    });
+
+    socket.on("friendRequest", async (data: {senderEmail: string}) => {
+
+      await handleFetchFriendRequests(setFriendRequests);
+
+      toast({
+        title: "New Friend Request",
+        description: `${data.senderEmail} has sent you a friend request`,
+      });
+    })
 
     // show toast notification
     toast({

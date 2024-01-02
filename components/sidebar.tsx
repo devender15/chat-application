@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { Button } from "./ui/button";
@@ -10,7 +12,12 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 
+import { useStateContext } from "@/contexts/state-context";
+
 export default function Sidebar() {
+
+  const { friendRequests } = useStateContext();
+
   return (
     <div className="border-r h-full w-full">
       <div className="space-y-4 p-4">
@@ -22,7 +29,7 @@ export default function Sidebar() {
           </Link>
           <Link href="/friend-requests">
             <Button className="w-full">
-              <BiNotification className="mr-2 h-4 w-4" /> Friend Requests ( 2 )
+              <BiNotification className="mr-2 h-4 w-4" /> Friend Requests {friendRequests.length > 0 ? `(${friendRequests.length})` : ""}
             </Button>
           </Link>
         </div>
