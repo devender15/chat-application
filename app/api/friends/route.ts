@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-
 import { db } from "@/lib/db";
 import { currentProfile } from "@/lib/current-profile";
 
@@ -11,19 +10,25 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // find the friend requests that this user has received from the database
-    const friendRequests = await db.friendRequest.findMany({
+    const friends = await db.friend.findFirst({
       where: {
-        receiverId: profile.id,
+        userId: profile.id,
       },
-      include: {
-        sender: true,
+      select: {
+        friends: true,
       },
     });
 
-    // console.log(friendRequests);
+    if(!friends) {
+        // return empty array if no friends
+        return new NextResponse(JSON.stringify([]), {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+    }
 
-    return new NextResponse(JSON.stringify(friendRequests), {
+    return new NextResponse(JSON.stringify(friends.friends), {
       headers: {
         "Content-Type": "application/json",
       },

@@ -26,3 +26,8 @@ export type FriendRequest = {
     updatedAt: string;
   };
 };
+
+export type Friend = Pick<
+FriendRequest["sender"],
+"id" | "name" | "email" | "imageUrl" | "createdAt" | "userId" | "updatedAt"
+>;

@@ -1,8 +1,7 @@
 "use client";
 
-import { useStateContext } from "@/contexts/state-context";
 import { DataTable } from "./data-table";
-import { type FriendRequest } from "@/types";
+import { type FriendRequest, type Friend } from "@/types";
 import { parseDateString } from "@/lib/utils";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -12,8 +11,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { useStateContext } from "@/contexts/state-context";
+import { useSocket } from "@/contexts/socket";
+import { useUser } from "@clerk/nextjs";
+
 export default function ShowRequestsData() {
-  const { friendRequests } = useStateContext();
+  const { friendRequests, setFriendRequests, setFriendsList, friendsList } =
+    useStateContext();
+  const { socket } = useSocket();
+  const { user } = useUser();
 
   const columns: ColumnDef<FriendRequest>[] = [
     {
@@ -101,19 +107,59 @@ export default function ShowRequestsData() {
     {
       accessorKey: "action",
       header: () => <div className="text-right">Action</div>,
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex items-center justify-center gap-x-2">
-          <Button size="icon" variant="ghost">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => handleAcceptRequest(row.original)}
+          >
             <Check className="h-4 w-4" color="green" />
           </Button>
 
-          <Button size="icon" variant="ghost">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => handleRejectRequest(row.original.senderId)}
+          >
             <X className="h-4 w-4" color="red" />
           </Button>
         </div>
       ),
     },
   ];
+
+  const handleAcceptRequest = (userObj: FriendRequest) => {
+    const data = {
+      accepted: userObj.senderId,
+      acceptor: user?.id,
+    };
+    socket.emit("acceptFriendRequest", data);
+
+    // update the friend requests list
+    const updatedFriendRequests: FriendRequest[] = friendRequests.filter(
+      (request: FriendRequest) => request.senderId !== userObj.senderId
+    );
+    setFriendRequests(updatedFriendRequests);
+
+    // update the friends list
+    const updatedFriendsList: Friend[] = [...friendsList, userObj.sender];
+    setFriendsList(updatedFriendsList);
+  };
+
+  const handleRejectRequest = (id: string) => {
+    const data = {
+      rejected: id,
+      rejector: user?.id,
+    };
+    socket.emit("rejectFriendRequest", data);
+
+    // update the friend requests list
+    const updatedFriendRequests: FriendRequest[] = friendRequests.filter(
+      (request: FriendRequest) => request.senderId !== id
+    );
+    setFriendRequests(updatedFriendRequests);
+  };
 
   return (
     <div className="w-full">

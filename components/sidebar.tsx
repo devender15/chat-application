@@ -11,12 +11,13 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { useStateContext } from "@/contexts/state-context";
 
 export default function Sidebar() {
-
-  const { friendRequests } = useStateContext();
+  const { friendRequests, friendsList } = useStateContext();
 
   return (
     <div className="border-r h-full w-full">
@@ -29,40 +30,49 @@ export default function Sidebar() {
           </Link>
           <Link href="/friend-requests">
             <Button className="w-full">
-              <BiNotification className="mr-2 h-4 w-4" /> Friend Requests {friendRequests.length > 0 ? `(${friendRequests.length})` : ""}
+              <BiNotification className="mr-2 h-4 w-4" /> Friend Requests{" "}
+              {friendRequests.length > 0 ? `(${friendRequests.length})` : ""}
             </Button>
           </Link>
         </div>
         <div className="px-3 py-2">
           <h2 className="mb-2 py-4 text-lg font-semibold tracking-tight">
-            Friends
+            Friends ( {friendsList.length} )
           </h2>
           <div className="space-y-1">
-            <Link href="/chat/6c8d370a-8dd4-49fc-9338-f70afb66140f">
-              <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  <Button variant="secondary" className="w-full justify-start">
-                    Jay
-                  </Button>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem>Remove friend</ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
-            </Link>
+            <ScrollArea className="h-[400px] w-full">
+              {friendsList.length === 0 ? (
+                <p>Awww... you don't have any friends :/</p>
+              ) : (
+                friendsList.map((friendObj) => (
+                  <Link href={`/chat/${friendObj.userId}`} key={friendObj.id}>
+                    <ContextMenu>
+                      <ContextMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          className="w-full justify-start flex items-center gap-x-3 h-16 mb-3"
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={friendObj.imageUrl}
+                              className="h-10 w-10"
+                            />
+                            <AvatarFallback>
+                              {friendObj.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
 
-            <Link href="/chat/855849be-fb3f-4b94-a290-2b95a222aa66">
-              <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start">
-                    Ronit
-                  </Button>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem>Remove friend</ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
-            </Link>
+                          {friendObj.name}
+                        </Button>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem>Remove friend</ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
+                  </Link>
+                ))
+              )}
+            </ScrollArea>
           </div>
         </div>
       </div>

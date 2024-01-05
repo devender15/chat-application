@@ -3,6 +3,7 @@ import { Server as ServerIO } from "socket.io";
 import { NextApiRequest } from "next";
 
 import { db } from "@/lib/db";
+import { findIdFromUid } from "@/lib/find-id-from-uid";
 
 import { NextApiResponseServerIo } from "@/types";
 
@@ -50,15 +51,7 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
         async (data: { senderId: string; receiverEmail: string }) => {
           const { senderId, receiverEmail } = data;
 
-          const sender = await db.profile.findFirst({
-            where: {
-              userId: senderId,
-            },
-            select: {
-              id: true,
-              email: true,
-            },
-          });
+          const sender = await findIdFromUid(senderId);
 
           if (!sender) {
             io.to(senderId).emit("friendRequestError", {
@@ -68,15 +61,7 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
             return;
           }
 
-          const reciever = await db.profile.findFirst({
-            where: {
-              email: receiverEmail,
-            },
-            select: {
-              userId: true,
-              id: true,
-            },
-          });
+          const reciever = await findIdFromUid(undefined, receiverEmail);
 
           if (!reciever) {
             io.to(senderId).emit("friendRequestError", {
@@ -85,7 +70,6 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
 
             return;
           }
-
 
           // check if a request has already been sent
           const requestExists = await db.friendRequest.findFirst({
@@ -102,7 +86,6 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
 
             return;
           }
-
 
           const receiverId = reciever.userId;
 
@@ -140,7 +123,9 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
           }
 
           // emit the friend request
-          io.to(receiverSocketId).emit("friendRequest", { senderEmail: sender.email });
+          io.to(receiverSocketId).emit("friendRequest", {
+            senderEmail: sender.email,
+          });
 
           // saving the friend request to the database
           await db.friendRequest.create({
@@ -152,23 +137,176 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
         }
       );
 
-      socket.on("acceptFriendRequest", (data) => {
-        const { senderId, receiverId } = data;
+      socket.on("acceptFriendRequest", async (data) => {
+        const { accepted, acceptor } = data;
 
-        // emit the acceptance message
-        // if(connectedUsers[senderId]) {
-        //   io.to(connectedUsers[senderId]).emit("friendRequestAccepted", { receiverId });
-        // }
+        const acceptorProfile = await findIdFromUid(acceptor);
+        const acceptedProfile = await findIdFromUid(accepted);
+
+        const friendRequestSentBySender = await db.friendRequest.findFirst({
+          where: {
+            AND: [{ senderId: accepted }, { receiverId: acceptorProfile?.id }],
+          },
+        });
+
+        if (!friendRequestSentBySender) {
+          io.to(acceptor).emit("friendRequestError", {
+            message: "Friend request not found",
+          });
+
+          return;
+        }
+
+        if (!acceptedProfile) {
+          io.to(acceptor).emit("friendRequestError", {
+            message: "User not found",
+          });
+
+          return;
+        }
+
+        // delete the friend request which the sender sent
+        await db.friendRequest.delete({
+          where: {
+            id: friendRequestSentBySender.id,
+          },
+        });
+
+        // check if the acceptor has already sent a friend request to the accepted
+        const friendRequestSentByAcceptor = await db.friendRequest.findFirst({
+          where: {
+            AND: [{ senderId: acceptorProfile?.id }, { receiverId: accepted }],
+          },
+        });
+
+        if (friendRequestSentByAcceptor) {
+          // delete the friend request which the acceptor sent
+          await db.friendRequest.delete({
+            where: {
+              id: friendRequestSentByAcceptor.id,
+            },
+          });
+        }
+
+        // check first if this users' entry already exists in the friend table
+        const userAlreadyExists = await db.friend.findFirst({
+          where: {
+            userId: acceptorProfile?.id!,
+          },
+        });
+
+        if (userAlreadyExists) {
+          // dont create a new entry instead just update the friends list
+          await db.friend.update({
+            where: {
+              userId: acceptorProfile?.id!,
+            },
+            data: {
+              friends: {
+                connect: {
+                  id: accepted,
+                },
+              },
+            },
+          });
+        } else {
+          // add the users to each other's friend list
+          await db.friend.create({
+            data: {
+              userId: acceptorProfile?.id!,
+              friends: {
+                connect: {
+                  id: accepted,
+                },
+              },
+            },
+          });
+        }
+
+        // do above operation for the accepted user
+        const acceptedUserEntryExistsInFriends = await db.friend.findFirst({
+          where: {
+            userId: accepted,
+          },
+        });
+
+        if (acceptedUserEntryExistsInFriends) {
+          // dont create a new entry instead just update the friends list
+          await db.friend.update({
+            where: {
+              userId: accepted,
+            },
+            data: {
+              friends: {
+                connect: {
+                  id: acceptorProfile?.id!,
+                },
+              },
+            },
+          });
+        } else {
+          // add the users to each other's friend list
+          await db.friend.create({
+            data: {
+              userId: accepted,
+              friends: {
+                connect: {
+                  id: acceptorProfile?.id!,
+                },
+              },
+            },
+          });
+        }
+
+        // emit the accept message
+        io.to(acceptedProfile.userId).emit("friendRequestAccepted", {
+          acceptorEmail: acceptorProfile?.email,
+        });
       });
 
-      socket.on("declineFriendRequest", (data) => {
-        const { senderId, receiverId } = data;
+      socket.on("rejectFriendRequest", async (data) => {
+        const { rejected, rejector } = data;
+
+        const rejectorProfile = await findIdFromUid(rejector);
+
+        if (!rejectorProfile) {
+          io.to(rejector).emit("friendRequestError", {
+            message: "Your info is not found",
+          });
+
+          return;
+        }
+
+        // delete the friend request which the sender sent
+        const friendRequestSentBySender = await db.friendRequest.findFirst({
+          where: {
+            AND: [{ senderId: rejected }, { receiverId: rejectorProfile.id }],
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!friendRequestSentBySender) {
+          io.to(rejector).emit("friendRequestError", {
+            message: "Friend request not found",
+          });
+
+          return;
+        }
+
+        await db.friendRequest.delete({
+          where: {
+            id: friendRequestSentBySender.id,
+          },
+        });
 
         // emit the decline message
-        // if(connectedUsers[senderId]) {
-        //   io.to(connectedUsers[senderId]).emit("friendRequestDeclined", { receiverId });
-        // }
+        io.to(rejector).emit("friendRequestDeclined", {
+          message: "success",
+        });
       });
+
       socket.on("disconnect", () => {
         console.log("user disconnected");
 

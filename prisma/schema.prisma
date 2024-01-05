@@ -22,10 +22,43 @@ model Profile {
   friendRequestSent FriendRequest[] @relation("FriendRequestSender")
   friendRequestReceived FriendRequest[] @relation("FriendRequestReceiver")
 
+  currentUser Friend[] @relation("currentUser")
+  friends Friend[] @relation("Friendship")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model FriendRequest {
+  id String @id @default(uuid())
+
+  senderId String
+  sender Profile @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver Profile @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+model Friend {
+  id String @id @default(uuid())
+
+  userId String
+  profile Profile @relation("currentUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  friends Profile[] @relation("Friendship")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@unique([userId])
+}
 
 // enum MemberRole {
 //   ADMIN
@@ -137,18 +170,3 @@ model Profile {
 //   @@index([userId])
 // }
 
-model FriendRequest {
-  id String @id @default(uuid())
-
-  senderId String
-  sender Profile @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
-
-  receiverId String
-  receiver Profile @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([senderId])
-  @@index([receiverId])
-}
