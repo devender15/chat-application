@@ -45,7 +45,7 @@ export default function Sidebar() {
                 <p>Awww... you don't have any friends :/</p>
               ) : (
                 friendsList.map((friendObj) => (
-                  <Link href={`/chat/${friendObj.userId}`} key={friendObj.id}>
+                  <Link href={`/chat/${friendObj.id}`} key={friendObj.id}>
                     <ContextMenu>
                       <ContextMenuTrigger asChild>
                         <Button
