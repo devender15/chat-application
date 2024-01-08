@@ -29,16 +29,8 @@ const findConversation = async (memberOneId: string, memberTwoId: string) => {
         ],
       },
       include: {
-        memberOne: {
-          include: {
-            profile: true,
-          },
-        },
-        // memberTwo: {
-        //   include: {
-        //     profile: true,
-        //   },
-        // },
+        memberOne: true,
+        memberTwo: true,
       },
     });
   } catch (err) {
@@ -58,16 +50,8 @@ const createNewConversation = async (
         memberTwoId,
       },
       include: {
-        memberOne: {
-          include: {
-            profile: true,
-          },
-        },
-        // memberTwo: {
-        //   include: {
-        //     profile: true,
-        //   },
-        // },
+        memberOne: true,
+        memberTwo: true,
       },
     });
   } catch (err) {

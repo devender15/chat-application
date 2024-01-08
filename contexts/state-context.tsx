@@ -17,11 +17,15 @@ import { useSocket } from "./socket";
 
 import { handleFetchFriendRequests } from "@/lib/utils";
 
+import { DirectMessage } from "@prisma/client";
+
 type StateContextType = {
   friendRequests: FriendRequest[];
   setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
   friendsList: Friend[];
   setFriendsList: React.Dispatch<React.SetStateAction<Friend[]>>;
+  directMessages: DirectMessage[];
+  setDirectMessages: React.Dispatch<React.SetStateAction<DirectMessage[]>>;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -29,6 +33,7 @@ export const StateContext = createContext({} as StateContextType);
 export function StateContextProvider({ children }: { children: ReactNode }) {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendsList, setFriendsList] = useState<Friend[]>([]);
+  const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -81,7 +86,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
 
   return (
     <StateContext.Provider
-      value={{ friendRequests, setFriendRequests, friendsList, setFriendsList }}
+      value={{ friendRequests, setFriendRequests, friendsList, setFriendsList, directMessages, setDirectMessages }}
     >
       {children}
     </StateContext.Provider>

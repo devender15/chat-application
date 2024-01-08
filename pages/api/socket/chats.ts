@@ -35,27 +35,19 @@ export default async function handler(
         OR: [
           {
             memberOne: {
-              profileId: profile.id,
+              id: profile.id,
             },
           },
           {
             memberTwo: {
-              profileId: profile.id,
+              id: profile.id,
             },
           },
         ],
       },
       include: {
-        memberOne: {
-          include: {
-            profile: true,
-          },
-        },
-        memberTwo: {
-          include: {
-            profile: true,
-          },
-        },
+        memberOne: true,
+        memberTwo: true,
       },
     });
 
@@ -64,7 +56,7 @@ export default async function handler(
     }
 
     const member =
-      conversation.memberOne.profileId === profile.id
+      conversation.memberOne.id === profile.id
         ? conversation.memberOne
         : conversation.memberTwo;
 
@@ -77,14 +69,10 @@ export default async function handler(
         content,
         fileUrl,
         conversationId: conversationId as string,
-        memberId: member.id,
+        profileId: member.id,
       },
       include: {
-        member: {
-          include: {
-            profile: true,
-          },
-        },
+        profile: true,
       },
     });
 
