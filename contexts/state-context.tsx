@@ -43,8 +43,6 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
       handleFetchFriendRequests(setFriendRequests);
       handleGetFriendsList();
 
-      // socket.emit("joinRoom", { userId: user.id });
-
       socket.on(`sendFriendRequest:${user.id}`, (data: Profile) => {
         setFriendRequests((prev) => [...prev, data]);
 
@@ -55,25 +53,13 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         });
       });
 
-      socket.on(
-        "friendRequestAccepted",
-        async (data: { acceptorEmail: string }) => {
-          toast({
-            variant: "default",
-            title: "Friend Request Accepted",
-            description: `${data.acceptorEmail} has accepted your friend request!`,
-          });
+      socket.on(`acceptFriendRequest:${user.id}`, (data: Profile) => {
+        setFriendsList((prev) => [...prev, data]);
 
-          await handleGetFriendsList();
-          await handleFetchFriendRequests(setFriendRequests);
-        }
-      );
-
-      socket.on("friendRequestDeclined", (data: { message: string }) => {
         toast({
           variant: "default",
-          title: "Friend Request Declined",
-          description: data.message,
+          title: "Friend Request Accepted",
+          description: `${data.email} has accepted your friend request!`,
         });
       });
     }

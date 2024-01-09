@@ -1,26 +1,26 @@
 "use client";
 
 import { DataTable } from "./data-table";
-import { type FriendRequestFromAPI } from "@/types";
 import { parseDateString } from "@/lib/utils";
 import { Profile } from "@prisma/client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Check, X } from "lucide-react";
+import axios, { AxiosError } from "axios";
+import qs from "query-string";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/components/ui/use-toast";
 
 import { useStateContext } from "@/contexts/state-context";
-import { useSocket } from "@/contexts/socket";
-import { useUser } from "@clerk/nextjs";
 
 export default function ShowRequestsData() {
   const { friendRequests, setFriendRequests, setFriendsList, friendsList } =
     useStateContext();
-  const { socket } = useSocket();
-  const { user } = useUser();
+
+  const { toast } = useToast();
 
   const columns: ColumnDef<Profile>[] = [
     {
@@ -118,7 +118,7 @@ export default function ShowRequestsData() {
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => handleRejectRequest(row.original.id)}
+            onClick={() => handleRejectRequest(row.original)}
           >
             <X className="h-4 w-4" color="red" />
           </Button>
@@ -127,12 +127,40 @@ export default function ShowRequestsData() {
     },
   ];
 
-  const handleAcceptRequest = (userObj: Profile) => {
+  const handleAcceptRequest = async (userObj: Profile) => {
+    try {
+      const data = {
+        acceptedRequest: userObj,
+      };
+
+      // update the friend requests list
+      const updatedFriendRequests: Profile[] = friendRequests.filter(
+        (request: Profile) => request.id !== userObj.id
+      );
+      setFriendRequests(updatedFriendRequests);
+
+      // update the friends list
+      const updatedFriendsList: Profile[] = [...friendsList, userObj];
+      setFriendsList(updatedFriendsList);
+
+      const url = qs.stringifyUrl({
+        url: "/api/socket/friend-request",
+        query: {
+          type: "accept",
+        },
+      });
+
+      const response = await axios.post(url, data);
+    } catch (err) {
+      const error = err as AxiosError;
+      console.log(error);
+    }
+  };
+
+  const handleRejectRequest = async (userObj: Profile) => {
     const data = {
-      accepted: userObj.id,
-      acceptor: user?.id,
+      rejectedRequest: userObj,
     };
-    socket.emit("acceptFriendRequest", data);
 
     // update the friend requests list
     const updatedFriendRequests: Profile[] = friendRequests.filter(
@@ -140,23 +168,22 @@ export default function ShowRequestsData() {
     );
     setFriendRequests(updatedFriendRequests);
 
-    // update the friends list
-    const updatedFriendsList: Profile[] = [...friendsList, userObj];
-    setFriendsList(updatedFriendsList);
-  };
+    const url = qs.stringifyUrl({
+      url: "/api/socket/friend-request",
+      query: {
+        type: "reject",
+      },
+    });
 
-  const handleRejectRequest = (id: string) => {
-    const data = {
-      rejected: id,
-      rejector: user?.id,
-    };
-    socket.emit("rejectFriendRequest", data);
+    const response = await axios.post(url, data);
 
-    // update the friend requests list
-    const updatedFriendRequests: Profile[] = friendRequests.filter(
-      (request: Profile) => request.id !== id
-    );
-    setFriendRequests(updatedFriendRequests);
+    if (response.status === 200) {
+      toast({
+        variant: "default",
+        title: "Friend Request Declined",
+        description: `You have rejected ${userObj.email} friend request!`,
+      });
+    }
   };
 
   return (
