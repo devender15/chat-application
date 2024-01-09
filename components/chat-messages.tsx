@@ -46,7 +46,7 @@ export default function ChatMessages({
   return (
     <div className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto">
       <div className="w-full space-y-2 text-white">
-        {directMessages.map((message) => {
+        {directMessages[chatId]?.map((message) => {
           return (
             <m.div
               initial={{

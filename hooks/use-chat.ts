@@ -15,14 +15,20 @@ export const useChat = ({ dmKey }: useChatProps) => {
   const { socket } = useSocket();
   const { directMessages, setDirectMessages } = useStateContext();
 
-
   useEffect(() => {
     if (!socket) return;
 
     socket.on(dmKey, (message: Message) => {
-      console.log("message", message);
+      const conversationId = message.conversationId;
 
-      setDirectMessages((prev) => [...prev, message]);
+      setDirectMessages((prev) => {
+        const prevMessagesOfAParticularConversation =
+          prev[conversationId] || [];
+        return {
+          ...prev,
+          [conversationId]: [...prevMessagesOfAParticularConversation, message],
+        };
+      });
     });
 
     return () => {
