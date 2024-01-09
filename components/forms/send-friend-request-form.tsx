@@ -9,13 +9,10 @@ import { ToastAction } from "../ui/toast";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import qs from "query-string";
+import axios, { AxiosError } from "axios";
 
 import { Plus } from "lucide-react";
-
-import { useSocket } from "@/contexts/socket";
-import { useStateContext } from "@/contexts/state-context";
-import { useUser } from "@clerk/nextjs";
-import { handleFetchFriendRequests } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -23,10 +20,6 @@ const formSchema = z.object({
 
 export default function SendFriendRequestForm() {
   const { toast } = useToast();
-
-  const { socket } = useSocket();
-  const { user } = useUser();
-  const { setFriendRequests } = useStateContext();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -38,40 +31,51 @@ export default function SendFriendRequestForm() {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (value: z.infer<typeof formSchema>) => {
-    // send friend request
-    socket.emit("sendFriendRequest", {
-      senderId: user?.id,
-      receiverEmail: value.email,
-    });
+    try {
+      const url = qs.stringifyUrl({
+        url: "/api/socket/friend-request",
+        query: {
+          receiverEmail: value.email,
+          type: "send",
+        },
+      });
 
-    socket.on("friendRequestError", (data: { message: string }) => {
+      const response = await axios.post(url);
+
+      if (response.status !== 200) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: response.data.message,
+        });
+
+        return;
+      }
+
+      // reset form
+      form.reset();
+
+      // show toast notification
+      toast({
+        title: "Friend Request Sent",
+        description: `A friend request has been sent to ${value.email}`,
+        action: (
+          <ToastAction altText="Undo" onClick={() => {}}>
+            Undo
+          </ToastAction>
+        ),
+      });
+    } catch (error) {
+      const err = error as AxiosError;
+
+      console.log(err);
+
       toast({
         variant: "destructive",
         title: "Error",
-        description: data.message,
+        description: err.message,
       });
-    });
-
-    socket.on("friendRequest", async (data: {senderEmail: string}) => {
-
-      await handleFetchFriendRequests(setFriendRequests);
-
-      toast({
-        title: "New Friend Request",
-        description: `${data.senderEmail} has sent you a friend request`,
-      });
-    })
-
-    // show toast notification
-    toast({
-      title: "Friend Request Sent",
-      description: `A friend request has been sent to ${value.email}`,
-      action: (
-        <ToastAction altText="Undo" onClick={() => {}}>
-          Undo
-        </ToastAction>
-      ),
-    });
+    }
   };
 
   return (

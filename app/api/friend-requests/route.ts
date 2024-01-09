@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
 import { currentProfile } from "@/lib/current-profile";
+import { Profile } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,16 +13,16 @@ export async function GET(req: NextRequest) {
     }
 
     // find the friend requests that this user has received from the database
-    const friendRequests = await db.friendRequest.findMany({
+    const friendRequestsFromDB = await db.friendRequest.findMany({
       where: {
         receiverId: profile.id,
       },
-      include: {
+      select: {
         sender: true,
       },
     });
 
-    // console.log(friendRequests);
+    const friendRequests: Profile[] = friendRequestsFromDB.map(request => request.sender);
 
     return new NextResponse(JSON.stringify(friendRequests), {
       headers: {

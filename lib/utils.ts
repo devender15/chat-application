@@ -2,20 +2,20 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import axios from "axios";
 import React from "react";
-import { type FriendRequest } from "@/types";
+import { Profile } from "@prisma/client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export const handleFetchFriendRequests = async (
-  setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>
+  setFriendRequests: React.Dispatch<React.SetStateAction<Profile[]>>
 ) => {
   const response = await axios.get("/api/friend-requests");
   setFriendRequests(response.data);
 };
 
-export const parseDateString = (dateString: string): string => {
+export const parseDateString = (dateString: Date): string => {
   const parsedDate = new Date(dateString);
 
   if (isNaN(parsedDate.getTime())) {

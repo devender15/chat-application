@@ -7,12 +7,11 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { type FriendRequest, type Friend } from "@/types";
+import { Profile } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 
 import { useUser } from "@clerk/nextjs";
-
 import { useSocket } from "./socket";
 
 import { handleFetchFriendRequests } from "@/lib/utils";
@@ -20,10 +19,10 @@ import { handleFetchFriendRequests } from "@/lib/utils";
 import { DirectMessage } from "@prisma/client";
 
 type StateContextType = {
-  friendRequests: FriendRequest[];
-  setFriendRequests: React.Dispatch<React.SetStateAction<FriendRequest[]>>;
-  friendsList: Friend[];
-  setFriendsList: React.Dispatch<React.SetStateAction<Friend[]>>;
+  friendRequests: Profile[];
+  setFriendRequests: React.Dispatch<React.SetStateAction<Profile[]>>;
+  friendsList: Profile[];
+  setFriendsList: React.Dispatch<React.SetStateAction<Profile[]>>;
   directMessages: DirectMessage[];
   setDirectMessages: React.Dispatch<React.SetStateAction<DirectMessage[]>>;
 };
@@ -31,8 +30,8 @@ type StateContextType = {
 export const StateContext = createContext({} as StateContextType);
 
 export function StateContextProvider({ children }: { children: ReactNode }) {
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
-  const [friendsList, setFriendsList] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<Profile[]>([]);
+  const [friendsList, setFriendsList] = useState<Profile[]>([]);
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
 
   const { user } = useUser();
@@ -44,16 +43,17 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
       handleFetchFriendRequests(setFriendRequests);
       handleGetFriendsList();
 
-      socket.emit("joinRoom", { userId: user.id });
+      // socket.emit("joinRoom", { userId: user.id });
 
-      socket.on(
-        "userJoinedRoom",
-        (data: { message: string; usersInRoom?: any }) => {
-          const { message, usersInRoom } = data;
-          // console.log(message);
-          // console.log(usersInRoom);
-        }
-      );
+      socket.on(`sendFriendRequest:${user.id}`, (data: Profile) => {
+        setFriendRequests((prev) => [...prev, data]);
+
+        toast({
+          variant: "default",
+          title: "New Friend Request",
+          description: `${data.email} has sent you a friend request!`,
+        });
+      });
 
       socket.on(
         "friendRequestAccepted",
@@ -69,13 +69,13 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      socket.on("friendRequestDeclined", (data: {message: string}) => {
+      socket.on("friendRequestDeclined", (data: { message: string }) => {
         toast({
           variant: "default",
           title: "Friend Request Declined",
           description: data.message,
         });
-      })
+      });
     }
   }, [user, socket]);
 
@@ -86,7 +86,14 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
 
   return (
     <StateContext.Provider
-      value={{ friendRequests, setFriendRequests, friendsList, setFriendsList, directMessages, setDirectMessages }}
+      value={{
+        friendRequests,
+        setFriendRequests,
+        friendsList,
+        setFriendsList,
+        directMessages,
+        setDirectMessages,
+      }}
     >
       {children}
     </StateContext.Provider>

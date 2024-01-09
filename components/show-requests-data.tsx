@@ -1,8 +1,9 @@
 "use client";
 
 import { DataTable } from "./data-table";
-import { type FriendRequest, type Friend } from "@/types";
+import { type FriendRequestFromAPI } from "@/types";
 import { parseDateString } from "@/lib/utils";
+import { Profile } from "@prisma/client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Check, X } from "lucide-react";
@@ -21,7 +22,7 @@ export default function ShowRequestsData() {
   const { socket } = useSocket();
   const { user } = useUser();
 
-  const columns: ColumnDef<FriendRequest>[] = [
+  const columns: ColumnDef<Profile>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -51,12 +52,9 @@ export default function ShowRequestsData() {
         <div className="w-full flex items-center gap-x-2 justify-center">
           <Avatar>
             <AvatarFallback>
-              {row.original.sender.name.charAt(0)}
+              {row.original.name.charAt(0).toUpperCase()}
             </AvatarFallback>
-            <AvatarImage
-              src={row.original.sender.imageUrl}
-              alt={row.original.sender.name}
-            />
+            <AvatarImage src={row.original.imageUrl} alt={row.original.name} />
           </Avatar>
         </div>
       ),
@@ -65,7 +63,7 @@ export default function ShowRequestsData() {
       accessorKey: "name",
       header: "Name",
       cell: ({ row }) => (
-        <div className="capitalize text-center">{row.original.sender.name}</div>
+        <div className="capitalize text-center">{row.original.name}</div>
       ),
     },
     {
@@ -82,7 +80,7 @@ export default function ShowRequestsData() {
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase text-center">{row.original.sender.email}</div>
+        <div className="lowercase text-center">{row.original.email}</div>
       ),
     },
     {
@@ -120,7 +118,7 @@ export default function ShowRequestsData() {
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => handleRejectRequest(row.original.senderId)}
+            onClick={() => handleRejectRequest(row.original.id)}
           >
             <X className="h-4 w-4" color="red" />
           </Button>
@@ -129,21 +127,21 @@ export default function ShowRequestsData() {
     },
   ];
 
-  const handleAcceptRequest = (userObj: FriendRequest) => {
+  const handleAcceptRequest = (userObj: Profile) => {
     const data = {
-      accepted: userObj.senderId,
+      accepted: userObj.id,
       acceptor: user?.id,
     };
     socket.emit("acceptFriendRequest", data);
 
     // update the friend requests list
-    const updatedFriendRequests: FriendRequest[] = friendRequests.filter(
-      (request: FriendRequest) => request.senderId !== userObj.senderId
+    const updatedFriendRequests: Profile[] = friendRequests.filter(
+      (request: Profile) => request.id !== userObj.id
     );
     setFriendRequests(updatedFriendRequests);
 
     // update the friends list
-    const updatedFriendsList: Friend[] = [...friendsList, userObj.sender];
+    const updatedFriendsList: Profile[] = [...friendsList, userObj];
     setFriendsList(updatedFriendsList);
   };
 
@@ -155,8 +153,8 @@ export default function ShowRequestsData() {
     socket.emit("rejectFriendRequest", data);
 
     // update the friend requests list
-    const updatedFriendRequests: FriendRequest[] = friendRequests.filter(
-      (request: FriendRequest) => request.senderId !== id
+    const updatedFriendRequests: Profile[] = friendRequests.filter(
+      (request: Profile) => request.id !== id
     );
     setFriendRequests(updatedFriendRequests);
   };
