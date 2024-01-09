@@ -60,7 +60,7 @@ export default function ChatMessages({
                 type: "spring",
                 stiffness: 260,
                 damping: 20,
-                duration: 0.5,
+                duration: 0.2,
               }}
               key={message.id}
               className={`flex ${

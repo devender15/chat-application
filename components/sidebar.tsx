@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Button } from "./ui/button";
 import { FaUserFriends } from "react-icons/fa";
@@ -18,6 +19,9 @@ import { useStateContext } from "@/contexts/state-context";
 
 export default function Sidebar() {
   const { friendRequests, friendsList } = useStateContext();
+  const pathname = usePathname();
+
+  const currentSelectedUserId = pathname?.split("/")[2]
 
   return (
     <div className="border-r h-full w-full">
@@ -50,7 +54,7 @@ export default function Sidebar() {
                       <ContextMenuTrigger asChild>
                         <Button
                           variant="secondary"
-                          className="w-full justify-start flex items-center gap-x-3 h-16 mb-3"
+                          className={`w-full justify-start flex items-center gap-x-3 h-16 mb-3 ${currentSelectedUserId === friendObj.id ? "font-bold bg-primary/25" : ""}`}
                         >
                           <Avatar>
                             <AvatarImage

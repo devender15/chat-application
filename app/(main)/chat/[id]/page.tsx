@@ -31,6 +31,8 @@ export default async function Page({ params }: MemberIdPageProps) {
   const { memberOne, memberTwo } = conversation;
 
   const otherMember = memberOne.id === profile.id ? memberTwo : memberOne;
+  
+  
 
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
@@ -51,7 +53,7 @@ export default async function Page({ params }: MemberIdPageProps) {
         <ChatInput
           apiUrl="/api/socket/chats"
           type="conversation"
-          name={memberTwo.name}
+          name={otherMember.name}
           query={{
             conversationId: conversation.id
           }}
