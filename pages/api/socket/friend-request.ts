@@ -28,7 +28,9 @@ export default async function handler(
     });
 
     if (!receiver) {
-      return res.status(404).json({ message: "Receiver not found!" });
+      return res
+        .status(404)
+        .json({ title: "Request Failed", message: "Receiver not found!" });
     }
 
     // check if the receiver is already a friend
@@ -42,7 +44,9 @@ export default async function handler(
     });
 
     if (requestExists) {
-      return res.status(400).json({ message: "Request already sent" });
+      return res
+        .status(400)
+        .json({ title: "Request Failed", message: "Request already sent" });
     }
 
     switch (type) {
@@ -57,12 +61,17 @@ export default async function handler(
         const sendFriendRequestKey = `sendFriendRequest:${receiver.userId}`;
 
         res?.socket?.server?.io?.emit(sendFriendRequestKey, profile);
+
+        return res
+          .status(200)
+          .json({
+            title: "Request Sent",
+            message: `Friend Request has been sent to ${receiver.email} !`,
+          });
         break;
 
       case "accept":
         const { acceptedRequest } = req.body;
-
-        console.log(acceptedRequest);
 
         if (!acceptedRequest) {
           return res.status(400).json({ message: "Invalid request" });
@@ -171,8 +180,6 @@ export default async function handler(
         }
 
         const acceptFriendRequestKey = `acceptFriendRequest:${acceptedRequest.userId}`;
-
-        console.log(acceptFriendRequestKey);
 
         res?.socket?.server?.io?.emit(acceptFriendRequestKey, profile);
         break;

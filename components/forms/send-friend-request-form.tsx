@@ -42,23 +42,13 @@ export default function SendFriendRequestForm() {
 
       const response = await axios.post(url);
 
-      if (response.status !== 200) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: response.data.message,
-        });
-
-        return;
-      }
-
       // reset form
       form.reset();
 
-      // show toast notification
+      // show success toast notification
       toast({
-        title: "Friend Request Sent",
-        description: `A friend request has been sent to ${value.email}`,
+        title: response.data.title,
+        description: response.data.message,
         action: (
           <ToastAction altText="Undo" onClick={() => {}}>
             Undo
@@ -68,12 +58,10 @@ export default function SendFriendRequestForm() {
     } catch (error) {
       const err = error as AxiosError;
 
-      console.log(err);
-
       toast({
         variant: "destructive",
-        title: "Error",
-        description: err.message,
+        title: (err.response?.data as { title: string })?.title,
+        description: (err.response?.data as { message?: string })?.message,
       });
     }
   };
