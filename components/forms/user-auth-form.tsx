@@ -10,17 +10,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useToast } from "../ui/use-toast";
-import { useAuthContext } from "@/contexts/auth";
 
-import { auth } from "@/firebase";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-
-import { UserAuthContextType } from "@/types";
 
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -38,7 +28,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     password: "",
     cpassword: "",
   });
-  const [currentUser, setCurrentUser] = useAuthContext() as UserAuthContextType;
 
   const pathname = usePathname();
   const { toast } = useToast();
@@ -61,80 +50,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   }
 
   const handleLoginWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider);
+
   };
 
   const handleSignUp = async () => {
-    // checking if passwords match
-    if (user.password !== user.cpassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    } else if (user.password.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-    createUserWithEmailAndPassword(auth, user.email, user.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
 
-        if (user) {
-          setCurrentUser(user);
-
-          toast({
-            title: "Success",
-            description: "Account created successfully",
-            variant: "default",
-          });
-
-          // redirecting to the homepage
-          redirect("/");
-        }
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("error", errorCode, errorMessage);
-      });
   };
 
   const handleLogin = async () => {
-    signInWithEmailAndPassword(auth, user.email, user.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        
-        if (user) {
-          setCurrentUser(user);
 
-          toast({
-            title: "Success",
-            description: "Logged in successfully",
-            variant: "default",
-          });
-
-          // redirecting to the homepage
-          redirect("/");
-        }
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("error", errorCode, errorMessage);
-
-        toast({
-          title: "Error",
-          description: "Invalid email or password",
-          variant: "destructive",
-        });
-      });
   };
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
