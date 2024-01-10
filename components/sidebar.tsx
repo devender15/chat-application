@@ -52,7 +52,7 @@ export default function Sidebar() {
           <div className="space-y-1">
             <ScrollArea className="h-[400px] w-full">
               {friendsList.length === 0 ? (
-                <p>Awww... you don't have any friends :/</p>
+                <p>Awww... you don&apos;t have any friends :/</p>
               ) : (
                 friendsList.map((friendObj) => (
                   <Link href={`/chat/${friendObj.id}`} key={friendObj.id}>
