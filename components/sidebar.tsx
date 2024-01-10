@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/context-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { useStateContext } from "@/contexts/state-context";
 
@@ -21,7 +27,7 @@ export default function Sidebar() {
   const { friendRequests, friendsList } = useStateContext();
   const pathname = usePathname();
 
-  const currentSelectedUserId = pathname?.split("/")[2]
+  const currentSelectedUserId = pathname?.split("/")[2];
 
   return (
     <div className="border-r h-full w-full">
@@ -54,7 +60,11 @@ export default function Sidebar() {
                       <ContextMenuTrigger asChild>
                         <Button
                           variant="secondary"
-                          className={`w-full justify-start flex items-center gap-x-3 h-16 mb-3 ${currentSelectedUserId === friendObj.id ? "font-bold bg-primary/25" : ""}`}
+                          className={`w-full justify-start flex items-center gap-x-3 h-16 mb-3 ${
+                            currentSelectedUserId === friendObj.id
+                              ? "bg-primary/25"
+                              : ""
+                          }`}
                         >
                           <Avatar>
                             <AvatarImage
@@ -65,8 +75,32 @@ export default function Sidebar() {
                               {friendObj.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
+                          <div className="flex flex-col items-start gap-y-1">
+                            <span className={`${
+                            currentSelectedUserId === friendObj.id
+                              ? "font-bold"
+                              : ""
+                          } text-base`}>
+                              {friendObj.name.length > 16
+                                ? friendObj.name.substring(0, 16)
+                                : friendObj.name}
+                            </span>
 
-                          {friendObj.name}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span
+                                    className={`text-gray-400 dark:text-gray-200 text-xs`}
+                                  >
+                                    hey whats...
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>hey whatsup, i hope you are doing well.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </Button>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
