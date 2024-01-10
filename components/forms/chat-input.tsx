@@ -12,8 +12,6 @@ import Emoji from "../emoji";
 import axios from "axios";
 import qs from "query-string";
 
-import { useRouter } from "next/navigation";
-
 
 const formSchema = z.object({
   content: z.string().min(1),
@@ -39,8 +37,6 @@ export default function ChatInput({
     },
   });
 
-  const router = useRouter();
-
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (value: z.infer<typeof formSchema>) => {
@@ -56,7 +52,6 @@ export default function ChatInput({
       await axios.post(url, {content, fileUrl});
 
       form.reset();
-      router.refresh();
     } catch (err) {
       console.log(err);
     }

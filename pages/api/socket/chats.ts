@@ -79,6 +79,8 @@ export default async function handler(
     const dmKey = `chat:${conversationId}:messages`;
 
     res?.socket?.server?.io?.emit(dmKey, message);
+
+    return res.status(200).json(message);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });
