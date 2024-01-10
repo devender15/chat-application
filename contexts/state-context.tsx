@@ -18,7 +18,6 @@ import { handleFetchFriendRequests } from "@/lib/utils";
 
 import { DirectMessage } from "@prisma/client";
 
-
 type DirectMessageState = Record<string, DirectMessage[]>;
 
 type StateContextType = {
@@ -57,7 +56,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
       });
 
       socket.on(`acceptFriendRequest:${user.id}`, (data: Profile) => {
-        setFriendsList((prev) => [...prev, data]);
+        setFriendsList((prev) => [data, ...prev]);
 
         toast({
           variant: "default",

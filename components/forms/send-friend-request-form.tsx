@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import qs from "query-string";
 import axios, { AxiosError } from "axios";
 
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -87,8 +87,8 @@ export default function SendFriendRequestForm() {
             disabled={isLoading || !form.formState.isValid}
             className="flex items-center justify-center space-x-2"
           >
-            <span>Send Friend Request</span>
-            <Plus size={16} />
+            <span>{isLoading ? "Sending..." : "Send Friend Request"}</span>
+            {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
           </Button>
         </div>
       </form>

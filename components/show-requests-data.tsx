@@ -140,7 +140,7 @@ export default function ShowRequestsData() {
       setFriendRequests(updatedFriendRequests);
 
       // update the friends list
-      const updatedFriendsList: Profile[] = [...friendsList, userObj];
+      const updatedFriendsList: Profile[] = [userObj, ...friendsList];
       setFriendsList(updatedFriendsList);
 
       const url = qs.stringifyUrl({

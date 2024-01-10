@@ -2,7 +2,7 @@
 
 import { motion as m } from "framer-motion";
 
-import { Profile } from "@prisma/client";
+import { Profile, DirectMessage } from "@prisma/client";
 import { useChat } from "@/hooks/use-chat";
 import { useStateContext } from "@/contexts/state-context";
 
@@ -19,6 +19,7 @@ interface ChatMessagesProps {
   member: Profile;
   otherMember: Profile;
   chatId: string;
+  chats: DirectMessage[];
   apiUrl: string;
   type: "conversation";
 }
@@ -27,13 +28,15 @@ export default function ChatMessages({
   member,
   otherMember,
   chatId,
+  chats,
   apiUrl,
   type,
 }: ChatMessagesProps) {
   const dmKey = `chat:${chatId}:messages`;
-  useChat({ dmKey });
+  useChat({ dmKey, chats });
 
   const { directMessages } = useStateContext();
+
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);

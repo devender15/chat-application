@@ -49,6 +49,16 @@ export default async function Page({ params }: MemberIdPageProps) {
 
   const otherMember = memberOne.id === profile.id ? memberTwo : memberOne;
 
+  // finding the chats of this conversation ( on server )
+  const chatsOfThisConversation = await db.directMessage.findMany({
+    where: {
+      conversationId: conversation.id,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  })
+
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
       <ChatHeader
@@ -62,6 +72,7 @@ export default async function Page({ params }: MemberIdPageProps) {
         chatId={conversation.id}
         type="conversation"
         apiUrl="/api/dm"
+        chats={chatsOfThisConversation}
       />
 
       <div className="w-[80%] mx-auto">
