@@ -4,6 +4,7 @@ import { redirectToSignIn } from "@clerk/nextjs";
 import { currentProfile } from "@/lib/current-profile";
 import { getOrCreateConversation } from "@/lib/conversation";
 import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
 
 import ChatHeader from "@/components/chat-header";
 import ChatMessages from "@/components/chat-messages";
@@ -16,10 +17,26 @@ interface MemberIdPageProps {
 
 export default async function Page({ params }: MemberIdPageProps) {
   const profile = await currentProfile();
- 
+
   if (!profile) {
     redirectToSignIn();
     return;
+  }
+
+  // check if the user is our friend or not
+  const friend = await db.friend.findFirst({
+    where: {
+      userId: profile.id,
+      friends: {
+        some: {
+          id: params.id,
+        },
+      },
+    },
+  });
+
+  if (!friend) {
+    redirect("/chat");
   }
 
   const conversation = await getOrCreateConversation(profile.id, params.id);
@@ -31,8 +48,6 @@ export default async function Page({ params }: MemberIdPageProps) {
   const { memberOne, memberTwo } = conversation;
 
   const otherMember = memberOne.id === profile.id ? memberTwo : memberOne;
-  
-  
 
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
@@ -55,7 +70,7 @@ export default async function Page({ params }: MemberIdPageProps) {
           type="conversation"
           name={otherMember.name}
           query={{
-            conversationId: conversation.id
+            conversationId: conversation.id,
           }}
         />
       </div>
