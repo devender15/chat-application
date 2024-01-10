@@ -24,15 +24,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { type FriendRequest } from "@/types";
+import { Profile } from "@prisma/client";
 
 
 
 
 type DataTableProps = {
   type: "send" | "receive";
-  columns: ColumnDef<FriendRequest>[];
-  data: FriendRequest[];
+  columns: ColumnDef<Profile>[];
+  data: Profile[];
 }
 
 export function DataTable({ type, columns, data }: DataTableProps) {
