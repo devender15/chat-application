@@ -20,7 +20,7 @@ export const useChat = ({ dmKey, chats }: useChatProps) => {
   useEffect(() => {
     if (!chats) return;
 
-    const conversationId = chats[0].conversationId;
+    const conversationId = chats[0]?.conversationId;
 
     setDirectMessages((prev) => {
       return {
@@ -35,7 +35,6 @@ export const useChat = ({ dmKey, chats }: useChatProps) => {
 
     socket.on(dmKey, (message: Message) => {
       const conversationId = message.conversationId;
-
       setDirectMessages((prev) => {
         const prevMessagesOfAParticularConversation =
           prev[conversationId] || [];

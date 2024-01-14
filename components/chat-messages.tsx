@@ -5,6 +5,7 @@ import { motion as m } from "framer-motion";
 import { Profile, DirectMessage } from "@prisma/client";
 import { useChat } from "@/hooks/use-chat";
 import { useStateContext } from "@/contexts/state-context";
+import ChatBubble from "./chat-bubble";
 
 import {
   ContextMenu,
@@ -36,7 +37,6 @@ export default function ChatMessages({
   useChat({ dmKey, chats });
 
   const { directMessages } = useStateContext();
-
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -74,9 +74,11 @@ export default function ChatMessages({
             >
               <ContextMenu>
                 <ContextMenuTrigger asChild>
-                  <p className="max-w-[40%] break-words p-2 rounded-sm bg-green-800">
+                  <ChatBubble message={message} direction="right" />
+
+                  {/* <p className="max-w-[40%] break-words p-2 rounded-sm bg-green-800">
                     {message.content}
-                  </p>
+                  </p> */}
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   {message.profileId === member.id ? (
@@ -99,12 +101,12 @@ export default function ChatMessages({
                     </>
                   ) : (
                     <ContextMenuItem
-                        onClick={() => handleCopyText(message.content)}
-                        className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
-                      >
-                        <Copy className="h-5 w-5" />
-                        Copy
-                      </ContextMenuItem>
+                      onClick={() => handleCopyText(message.content)}
+                      className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+                    >
+                      <Copy className="h-5 w-5" />
+                      Copy
+                    </ContextMenuItem>
                   )}
                 </ContextMenuContent>
               </ContextMenu>
