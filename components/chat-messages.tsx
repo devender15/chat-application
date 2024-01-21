@@ -6,6 +6,7 @@ import { Profile, DirectMessage } from "@prisma/client";
 import { useChat } from "@/hooks/use-chat";
 import { useStateContext } from "@/contexts/state-context";
 import ChatBubble from "./chat-bubble";
+import { ThreeDots } from "react-loader-spinner";
 
 import {
   ContextMenu,
@@ -74,11 +75,11 @@ export default function ChatMessages({
             >
               <ContextMenu>
                 <ContextMenuTrigger asChild>
-                  <ChatBubble message={message} direction="right" />
-
-                  {/* <p className="max-w-[40%] break-words p-2 rounded-sm bg-green-800">
-                    {message.content}
-                  </p> */}
+                  {message.profileId !== otherMember.id ? (
+                    <ChatBubble message={message} direction="right" />
+                  ) : (
+                    <ChatBubble message={message} direction="left" />
+                  )}
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   {message.profileId === member.id ? (
@@ -113,6 +114,16 @@ export default function ChatMessages({
             </m.div>
           );
         })}
+        <ThreeDots
+          height="60"
+          width="60"
+          radius="9"
+          color="gray"
+          ariaLabel="three-dots-loading"
+          visible={true}
+          wrapperStyle={{}}
+          wrapperClass=""
+        />
       </div>
     </div>
   );
