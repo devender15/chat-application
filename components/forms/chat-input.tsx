@@ -8,10 +8,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import Emoji from "../emoji";
+import { Profile } from "@prisma/client";
+import { useEmitTyping } from "@/hooks/use-emit-typing";
+import { useState } from "react";
 
 import axios from "axios";
 import qs from "query-string";
-
 
 const formSchema = z.object({
   content: z.string().min(1),
@@ -20,16 +22,22 @@ const formSchema = z.object({
 interface ChatInputProps {
   apiUrl: string;
   query: Record<string, any>;
-  name: string;
+  otherUser: Profile;
   type: "conversation";
+  currentUser: Profile;
+  conversationId: string;
 }
 
 export default function ChatInput({
   apiUrl,
   query,
-  name,
+  otherUser,
   type,
+  currentUser,
+  conversationId,
 }: ChatInputProps) {
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,6 +46,13 @@ export default function ChatInput({
   });
 
   const isLoading = form.formState.isSubmitting;
+
+  useEmitTyping({
+    conversationId,
+    currentProfile: currentUser,
+    otherUserProfile: otherUser,
+    hasStartedTyping,
+  });
 
   const onSubmit = async (value: z.infer<typeof formSchema>) => {
     const { content } = value;
@@ -49,9 +64,10 @@ export default function ChatInput({
         query,
       });
 
-      await axios.post(url, {content, fileUrl});
+      await axios.post(url, { content, fileUrl });
 
       form.reset();
+      setHasStartedTyping(false);
     } catch (err) {
       console.log(err);
     }
@@ -77,11 +93,21 @@ export default function ChatInput({
                   <Input
                     disabled={isLoading}
                     className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                    placeholder={`Message ${name}...`}
-                    {...field}
+                    placeholder={`Message ${otherUser.name}...`}
+                    onChangeCapture={() => setHasStartedTyping(true)}
+                    onBlur={() => {
+                      setHasStartedTyping(false);
+                    }}
+                    onChange={field.onChange}
+                    value={field.value}
+                    name={field.name}
                   />
                   <div className="absolute top-7 right-8">
-                    <Emoji onChange={(emoji: string) => field.onChange(`${field.value} ${emoji}`)} />
+                    <Emoji
+                      onChange={(emoji: string) =>
+                        field.onChange(`${field.value} ${emoji}`)
+                      }
+                    />
                   </div>
                 </div>
               </FormControl>
@@ -90,5 +116,5 @@ export default function ChatInput({
         />
       </form>
     </Form>
-  );  
+  );
 }

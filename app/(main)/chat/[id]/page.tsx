@@ -79,10 +79,12 @@ export default async function Page({ params }: MemberIdPageProps) {
         <ChatInput
           apiUrl="/api/socket/chats"
           type="conversation"
-          name={otherMember.name}
+          otherUser={otherMember}
           query={{
             conversationId: conversation.id,
           }}
+          currentUser={profile}
+          conversationId={conversation.id}
         />
       </div>
     </div>

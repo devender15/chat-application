@@ -37,7 +37,7 @@ export default function ChatMessages({
   const dmKey = `chat:${chatId}:messages`;
   useChat({ dmKey, chats });
 
-  const { directMessages } = useStateContext();
+  const { directMessages, usersTyping } = useStateContext();
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -114,16 +114,18 @@ export default function ChatMessages({
             </m.div>
           );
         })}
-        <ThreeDots
-          height="60"
-          width="60"
-          radius="9"
-          color="gray"
-          ariaLabel="three-dots-loading"
-          visible={true}
-          wrapperStyle={{}}
-          wrapperClass=""
-        />
+        {usersTyping[otherMember.id] && (
+          <ThreeDots
+            height="60"
+            width="60"
+            radius="9"
+            color="gray"
+            ariaLabel="three-dots-loading"
+            visible={true}
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        )}
       </div>
     </div>
   );

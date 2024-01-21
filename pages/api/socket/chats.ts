@@ -80,7 +80,7 @@ export default async function handler(
 
     res?.socket?.server?.io?.emit(dmKey, message);
 
-    return res.status(200).json(message);
+    return res.status(200).json("");
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });

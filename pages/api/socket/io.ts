@@ -1,7 +1,7 @@
 import { Server as NetServer } from "http";
 import { Server as ServerIO } from "socket.io";
 import { NextApiRequest } from "next";
-
+import { handleSocketGeneralEvents } from "@/lib/socket-general-events";
 import { NextApiResponseServerIo } from "@/types";
 
 export const config = {
@@ -26,6 +26,8 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
 
     io.on("connection", async (socket) => {
       console.log("a user connected");
+
+      handleSocketGeneralEvents(socket, io);
 
       socket.on("disconnect", () => {
         console.log("user disconnected");
