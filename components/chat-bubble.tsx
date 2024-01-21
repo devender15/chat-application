@@ -24,9 +24,11 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
         <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
           {message.content}
         </p>
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-          Delivered
-        </span>
+        {direction === "right" && (
+          <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+            Delivered
+          </span>
+        )}
       </div>
       <button
         id="dropdownMenuIconButton"
