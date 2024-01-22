@@ -57,7 +57,7 @@ export default async function Page({ params }: MemberIdPageProps) {
     orderBy: {
       createdAt: "asc",
     },
-  })
+  });
 
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
@@ -70,8 +70,6 @@ export default async function Page({ params }: MemberIdPageProps) {
         member={profile}
         otherMember={otherMember}
         chatId={conversation.id}
-        type="conversation"
-        apiUrl="/api/dm"
         chats={chatsOfThisConversation}
       />
 

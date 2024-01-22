@@ -11,6 +11,7 @@ import Emoji from "../emoji";
 import { Profile } from "@prisma/client";
 import { useEmitTyping } from "@/hooks/use-emit-typing";
 import { useState } from "react";
+import { useStateContext } from "@/contexts/state-context";
 
 import axios from "axios";
 import qs from "query-string";
@@ -37,6 +38,8 @@ export default function ChatInput({
   conversationId,
 }: ChatInputProps) {
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
+
+  const { messagesSeen, setMessagesSeen } = useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,6 +71,12 @@ export default function ChatInput({
 
       form.reset();
       setHasStartedTyping(false);
+
+      // update the message seen status of the other person
+      setMessagesSeen((prev) => ({
+        ...prev,
+        [otherUser.id]: false,
+      }));
     } catch (err) {
       console.log(err);
     }

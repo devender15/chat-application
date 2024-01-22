@@ -29,6 +29,8 @@ type StateContextType = {
   setDirectMessages: React.Dispatch<React.SetStateAction<DirectMessageState>>;
   usersTyping: Record<string, boolean>;
   setUsersTyping: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  messagesSeen: Record<string, boolean>;
+  setMessagesSeen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -38,6 +40,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
   const [friendsList, setFriendsList] = useState<Profile[]>([]);
   const [directMessages, setDirectMessages] = useState<DirectMessageState>({});
   const [usersTyping, setUsersTyping] = useState<Record<string, boolean>>({});
+  const [messagesSeen, setMessagesSeen] = useState<Record<string, boolean>>({});
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -86,6 +89,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setDirectMessages,
         usersTyping,
         setUsersTyping,
+        messagesSeen,
+        setMessagesSeen,
       }}
     >
       {children}

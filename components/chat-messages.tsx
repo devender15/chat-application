@@ -7,6 +7,7 @@ import { useChat } from "@/hooks/use-chat";
 import { useStateContext } from "@/contexts/state-context";
 import ChatBubble from "./chat-bubble";
 import { ThreeDots } from "react-loader-spinner";
+import { useRef } from "react";
 
 import {
   ContextMenu,
@@ -22,8 +23,6 @@ interface ChatMessagesProps {
   otherMember: Profile;
   chatId: string;
   chats: DirectMessage[];
-  apiUrl: string;
-  type: "conversation";
 }
 
 export default function ChatMessages({
@@ -31,13 +30,14 @@ export default function ChatMessages({
   otherMember,
   chatId,
   chats,
-  apiUrl,
-  type,
 }: ChatMessagesProps) {
-  const dmKey = `chat:${chatId}:messages`;
-  useChat({ dmKey, chats });
+  const { directMessages, usersTyping, messagesSeen } = useStateContext();
 
-  const { directMessages, usersTyping } = useStateContext();
+  const messageRef = useRef<HTMLDivElement>(null);
+
+  const dmKey = `chat:${chatId}:messages`;
+
+  useChat({ dmKey, chats, messageRef, chatId, member, otherMember });
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -45,6 +45,16 @@ export default function ChatMessages({
 
   const isRightSide = (messageProfileId: string) => {
     return messageProfileId === member.id;
+  };
+
+  const handleShowSeenMessage = () => {
+    console.log(!directMessages[chatId]);
+    if (!directMessages[chatId]) return;
+
+    return (
+      directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
+        member.id && messagesSeen[otherMember.id]
+    );
   };
 
   return (
@@ -72,6 +82,7 @@ export default function ChatMessages({
                   ? "justify-start"
                   : "justify-end"
               }`}
+              ref={message.profileId === otherMember.id ? messageRef : null}
             >
               <ContextMenu>
                 <ContextMenuTrigger asChild>
@@ -114,6 +125,12 @@ export default function ChatMessages({
             </m.div>
           );
         })}
+        {handleShowSeenMessage() && (
+          <p className="flex justify-end text-gray-400 text-sm font-bold">
+            seen
+          </p>
+        )}
+
         {usersTyping[otherMember.id] && (
           <ThreeDots
             height="60"
