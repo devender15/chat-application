@@ -9,15 +9,6 @@ import ChatBubble from "./chat-bubble";
 import { ThreeDots } from "react-loader-spinner";
 import { useRef } from "react";
 
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-
-import { Pencil, Copy, Trash2 } from "lucide-react";
-
 interface ChatMessagesProps {
   member: Profile;
   otherMember: Profile;
@@ -39,16 +30,11 @@ export default function ChatMessages({
 
   useChat({ dmKey, chats, messageRef, chatId, member, otherMember });
 
-  const handleCopyText = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
   const isRightSide = (messageProfileId: string) => {
     return messageProfileId === member.id;
   };
 
   const handleShowSeenMessage = () => {
-    console.log(!directMessages[chatId]);
     if (!directMessages[chatId]) return;
 
     return (
@@ -84,44 +70,11 @@ export default function ChatMessages({
               }`}
               ref={message.profileId === otherMember.id ? messageRef : null}
             >
-              <ContextMenu>
-                <ContextMenuTrigger asChild>
-                  {message.profileId !== otherMember.id ? (
-                    <ChatBubble message={message} direction="right" />
-                  ) : (
-                    <ChatBubble message={message} direction="left" />
-                  )}
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  {message.profileId === member.id ? (
-                    <>
-                      <ContextMenuItem className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left">
-                        <Pencil className="h-5 w-5" />
-                        Edit
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => handleCopyText(message.content)}
-                        className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
-                      >
-                        <Copy className="h-5 w-5" />
-                        Copy
-                      </ContextMenuItem>
-                      <ContextMenuItem className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left">
-                        <Trash2 className="h-5 w-5" />
-                        Delete
-                      </ContextMenuItem>
-                    </>
-                  ) : (
-                    <ContextMenuItem
-                      onClick={() => handleCopyText(message.content)}
-                      className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
-                    >
-                      <Copy className="h-5 w-5" />
-                      Copy
-                    </ContextMenuItem>
-                  )}
-                </ContextMenuContent>
-              </ContextMenu>
+              {message.profileId !== otherMember.id ? (
+                <ChatBubble message={message} direction="right" />
+              ) : (
+                <ChatBubble message={message} direction="left" />
+              )}
             </m.div>
           );
         })}
