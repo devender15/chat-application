@@ -1,6 +1,8 @@
 import { DirectMessage } from "@prisma/client";
 
 import { Pencil, Copy, Trash2 } from "lucide-react";
+import axios from "axios";
+import qs from "query-string";
 
 import {
   ContextMenu,
@@ -17,6 +19,20 @@ type ChatBubbleProps = {
 export default function ChatBubble({ message, direction }: ChatBubbleProps) {
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const handleDeleteChat = async (id: string) => {
+    try {
+      const url = qs.stringifyUrl({
+        url: `/api/socket/${id}`,
+        query: { conversationId: message.conversationId },
+      });
+
+      const resp = await axios.delete(url);
+      console.log(resp.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -61,7 +77,10 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
               <Copy className="h-5 w-5" />
               Copy
             </ContextMenuItem>
-            <ContextMenuItem className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left">
+            <ContextMenuItem
+              onClick={() => handleDeleteChat(message.id)}
+              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+            >
               <Trash2 className="h-5 w-5" />
               Delete
             </ContextMenuItem>

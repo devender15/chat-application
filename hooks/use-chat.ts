@@ -25,7 +25,8 @@ export const useChat = ({
   otherMember,
 }: useChatProps) => {
   const { socket } = useSocket();
-  const { setDirectMessages, directMessages, messagesSeen, setMessagesSeen } = useStateContext();
+  const { setDirectMessages, directMessages, setMessagesSeen } =
+    useStateContext();
 
   useEffect(() => {
     if (!chats) return;
@@ -63,10 +64,22 @@ export const useChat = ({
           [data.profile.id]: true,
         };
       });
-    })
+    });
+
+    socket.on(`updateChat:${chatId}`, (data: DirectMessage) => {
+      console.log(data);
+      setDirectMessages((prev) => {
+        const prevMessagesOfAParticularConversation = prev[chatId] || [];
+        return {
+          ...prev,
+          [chatId]: [...prevMessagesOfAParticularConversation, data],
+        };
+      });
+    });
 
     return () => {
       socket.off(dmKey);
+      socket.off(`messageSeen:${chatId}:${otherMember.id}`);
     };
   }, [socket]);
 
