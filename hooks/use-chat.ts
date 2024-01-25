@@ -67,12 +67,19 @@ export const useChat = ({
     });
 
     socket.on(`updateChat:${chatId}`, (data: DirectMessage) => {
-      console.log(data);
       setDirectMessages((prev) => {
-        const prevMessagesOfAParticularConversation = prev[chatId] || [];
+        let prevMessagesOfAParticularConversation = prev[chatId] || [];
+        prevMessagesOfAParticularConversation = prevMessagesOfAParticularConversation.map(
+          (message) => {
+            if (message.id === data.id) {
+              return data;
+            }
+            return message;
+          }
+        );
         return {
           ...prev,
-          [chatId]: [...prevMessagesOfAParticularConversation, data],
+          [chatId]: prevMessagesOfAParticularConversation,
         };
       });
     });
