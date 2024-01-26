@@ -89,9 +89,9 @@ export default function ChatInput({
         });
 
         await axios.post(url, { content, fileUrl });
+        form.reset();
       }
 
-      form.reset();
       setHasStartedTyping(false);
 
       // update the message seen status of the other person
@@ -106,6 +106,7 @@ export default function ChatInput({
 
   const handleResetEditableChat = () => {
     setEditableChat({ id: "", content: "" });
+    form.reset();
   };
 
   useEffect(() => {
