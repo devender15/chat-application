@@ -10,7 +10,7 @@ import { Plus } from "lucide-react";
 import Emoji from "../emoji";
 import { Profile } from "@prisma/client";
 import { useEmitTyping } from "@/hooks/use-emit-typing";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStateContext } from "@/contexts/state-context";
 
 import axios from "axios";
@@ -39,7 +39,8 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
-  const { messagesSeen, setMessagesSeen } = useStateContext();
+  const { setMessagesSeen, editableChat, setEditableChat } =
+    useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,12 +63,26 @@ export default function ChatInput({
     const fileUrl = "";
 
     try {
-      const url = qs.stringifyUrl({
-        url: apiUrl,
-        query,
-      });
+      if (editableChat.id) {
+        const url = qs.stringifyUrl({
+          url: `/api/socket/${editableChat.id}`,
+          query: {
+            chatId: editableChat.id,
+            conversationId,
+          },
+        });
 
-      await axios.post(url, { content, fileUrl });
+        await axios.patch(url, { content });
+
+        setEditableChat({ id: "", content: "" });
+      } else {
+        const url = qs.stringifyUrl({
+          url: apiUrl,
+          query,
+        });
+
+        await axios.post(url, { content, fileUrl });
+      }
 
       form.reset();
       setHasStartedTyping(false);
@@ -81,6 +96,12 @@ export default function ChatInput({
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    if (editableChat.id) {
+      form.setValue("content", editableChat.content);
+    }
+  }, [editableChat]);
 
   return (
     <Form {...form}>

@@ -31,6 +31,8 @@ type StateContextType = {
   setUsersTyping: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   messagesSeen: Record<string, boolean>;
   setMessagesSeen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  editableChat: Record<string, string>;
+  setEditableChat: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -41,6 +43,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
   const [directMessages, setDirectMessages] = useState<DirectMessageState>({});
   const [usersTyping, setUsersTyping] = useState<Record<string, boolean>>({});
   const [messagesSeen, setMessagesSeen] = useState<Record<string, boolean>>({});
+  const [editableChat, setEditableChat] = useState<Record<string, string>>({});
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -91,6 +94,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setUsersTyping,
         messagesSeen,
         setMessagesSeen,
+        editableChat,
+        setEditableChat,
       }}
     >
       {children}

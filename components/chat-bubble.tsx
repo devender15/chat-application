@@ -4,6 +4,8 @@ import { Pencil, Copy, Trash2 } from "lucide-react";
 import axios from "axios";
 import qs from "query-string";
 
+import { useStateContext } from "@/contexts/state-context";
+
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,6 +19,8 @@ type ChatBubbleProps = {
 };
 
 export default function ChatBubble({ message, direction }: ChatBubbleProps) {
+  const { setEditableChat } = useStateContext();
+
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
   };
@@ -28,11 +32,14 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
         query: { conversationId: message.conversationId },
       });
 
-      const resp = await axios.delete(url);
-      console.log(resp.data);
+      await axios.delete(url);
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handleEditChat = () => {
+    setEditableChat({ id: message.id, content: message.content });
   };
 
   return (
@@ -52,7 +59,11 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
                 {message.createdAt.toLocaleString().split(",")[1]}
               </span>
             </div>
-            <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
+            <p
+              className={`text-sm font-normal py-2.5 text-gray-900 dark:text-white ${
+                message.deleted ? "italic" : ""
+              }`}
+            >
               {message.content}
             </p>
             {direction === "right" && (
@@ -66,16 +77,19 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
       <ContextMenuContent>
         {direction === "right" ? (
           <>
-            <ContextMenuItem className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left">
-              <Pencil className="h-5 w-5" />
-              Edit
-            </ContextMenuItem>
             <ContextMenuItem
               onClick={() => handleCopyText(message.content)}
               className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
             >
               <Copy className="h-5 w-5" />
               Copy
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={handleEditChat}
+              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+            >
+              <Pencil className="h-5 w-5" />
+              Edit
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => handleDeleteChat(message.id)}
