@@ -2,6 +2,12 @@
 
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "../ui/button";
 
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -15,6 +21,8 @@ import { useStateContext } from "@/contexts/state-context";
 
 import axios from "axios";
 import qs from "query-string";
+
+import { X } from "lucide-react";
 
 const formSchema = z.object({
   content: z.string().min(1),
@@ -39,8 +47,7 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
-  const { setMessagesSeen, editableChat, setEditableChat } =
-    useStateContext();
+  const { setMessagesSeen, editableChat, setEditableChat } = useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,7 +81,7 @@ export default function ChatInput({
 
         await axios.patch(url, { content });
 
-        setEditableChat({ id: "", content: "" });
+        handleResetEditableChat();
       } else {
         const url = qs.stringifyUrl({
           url: apiUrl,
@@ -97,6 +104,10 @@ export default function ChatInput({
     }
   };
 
+  const handleResetEditableChat = () => {
+    setEditableChat({ id: "", content: "" });
+  };
+
   useEffect(() => {
     if (editableChat.id) {
       form.setValue("content", editableChat.content);
@@ -104,47 +115,60 @@ export default function ChatInput({
   }, [editableChat]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <div className="relative p-4 pb-6">
-                  <button
-                    type="button"
-                    onClick={() => {}}
-                    className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
-                  >
-                    <Plus className="text-white dark:text-[#313338]" />
-                  </button>
-                  <Input
-                    disabled={isLoading}
-                    className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                    placeholder={`Message ${otherUser.name}...`}
-                    onChangeCapture={() => setHasStartedTyping(true)}
-                    onBlur={() => {
-                      setHasStartedTyping(false);
-                    }}
-                    onChange={field.onChange}
-                    value={field.value}
-                    name={field.name}
-                  />
-                  <div className="absolute top-7 right-8">
-                    <Emoji
-                      onChange={(emoji: string) =>
-                        field.onChange(`${field.value} ${emoji}`)
-                      }
+    <>
+
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="relative p-4 pb-6">
+                    <button
+                      type="button"
+                      onClick={() => {}}
+                      className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
+                    >
+                      <Plus className="text-white dark:text-[#313338]" />
+                    </button>
+                    <Input
+                      disabled={isLoading}
+                      className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                      placeholder={`Message ${otherUser.name}...`}
+                      onChangeCapture={() => setHasStartedTyping(true)}
+                      onBlur={() => {
+                        setHasStartedTyping(false);
+                      }}
+                      onChange={field.onChange}
+                      value={field.value}
+                      name={field.name}
                     />
+                    <div className="absolute top-7 right-8">
+                      <Emoji
+                        onChange={(emoji: string) =>
+                          field.onChange(`${field.value} ${emoji}`)
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+      <Popover open={editableChat.id ? true : false}>
+        <PopoverTrigger></PopoverTrigger>
+        <PopoverContent className="flex items-center gap-x-3 dark:bg-neutral-500 mb-[6rem] w-fit" align="start">
+          <p className="font-bold italic">{editableChat.id && editableChat.content}</p>
+          <Button size="icon" variant="ghost">
+            <X onClick={handleResetEditableChat} />
+          </Button>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 }
