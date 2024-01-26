@@ -7,7 +7,7 @@ import { useChat } from "@/hooks/use-chat";
 import { useStateContext } from "@/contexts/state-context";
 import ChatBubble from "./chat-bubble";
 import { ThreeDots } from "react-loader-spinner";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 interface ChatMessagesProps {
   member: Profile;
@@ -25,6 +25,7 @@ export default function ChatMessages({
   const { directMessages, usersTyping, messagesSeen } = useStateContext();
 
   const messageRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const dmKey = `chat:${chatId}:messages`;
 
@@ -43,8 +44,15 @@ export default function ChatMessages({
     );
   };
 
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef?.current?.scrollHeight;
+    }
+  }, [directMessages[chatId]]);
+
   return (
-    <div className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto">
+    <div ref={chatContainerRef} className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto">
       <div className="w-full space-y-2 text-white">
         {directMessages[chatId]?.map((message) => {
           return (
@@ -70,11 +78,12 @@ export default function ChatMessages({
               }`}
               ref={message.profileId === otherMember.id ? messageRef : null}
             >
-              {message.profileId !== otherMember.id ? (
-                <ChatBubble message={message} direction="right" />
-              ) : (
-                <ChatBubble message={message} direction="left" />
-              )}
+              <ChatBubble
+                message={message}
+                direction={
+                  message.profileId !== otherMember.id ? "right" : "left"
+                }
+              />
             </m.div>
           );
         })}
