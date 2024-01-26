@@ -75,7 +75,7 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        {direction === "right" ? (
+        {direction === "right" && !message.deleted ? (
           <>
             <ContextMenuItem
               onClick={() => handleCopyText(message.content)}
