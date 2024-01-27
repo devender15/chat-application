@@ -42,6 +42,20 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
     setEditableChat({ id: message.id, content: message.content });
   };
 
+  const checkIfTheTextIsLink = (s: string) => {
+    const pattern = new RegExp(
+      "^(https?:\\/\\/)?" +
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
+        "((\\d{1,3}\\.){3}\\d{1,3}))" +
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
+        "(\\?[;&a-z\\d%_.~+=-]*)?" +
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    );
+
+    return pattern.test(s);
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -64,7 +78,18 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
                 message.deleted ? "italic" : ""
               }`}
             >
-              {message.content}
+              {checkIfTheTextIsLink(message.content) ? (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={"//"+message.content}
+                  className="hover:text-blue-500 dark:hover:text-blue-400 hover:underline"
+                >
+                  {message.content}
+                </a>
+              ) : (
+                message.content
+              )}
             </p>
             {direction === "right" && (
               <span className="text-sm font-normal text-gray-500 dark:text-gray-400">

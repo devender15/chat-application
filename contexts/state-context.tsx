@@ -33,6 +33,8 @@ type StateContextType = {
   setMessagesSeen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   editableChat: Record<string, string>;
   setEditableChat: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  fileMessageModal: Record<string, string | Record<string, any>>;
+  setFileMessageModal: React.Dispatch<React.SetStateAction<Record<string, string  | Record<string, any>>>>;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -44,6 +46,10 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
   const [usersTyping, setUsersTyping] = useState<Record<string, boolean>>({});
   const [messagesSeen, setMessagesSeen] = useState<Record<string, boolean>>({});
   const [editableChat, setEditableChat] = useState<Record<string, string>>({});
+  const [fileMessageModal, setFileMessageModal] = useState<Record<string, string | Record<string, any>>>({
+    apiUrl: "",
+    query: {},
+  });
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -96,6 +102,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setMessagesSeen,
         editableChat,
         setEditableChat,
+        fileMessageModal,
+        setFileMessageModal,
       }}
     >
       {children}

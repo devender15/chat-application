@@ -47,7 +47,12 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
-  const { setMessagesSeen, editableChat, setEditableChat } = useStateContext();
+  const {
+    setMessagesSeen,
+    editableChat,
+    setEditableChat,
+    setFileMessageModal,
+  } = useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -94,7 +99,6 @@ export default function ChatInput({
 
       setHasStartedTyping(false);
 
-      // update the message seen status of the other person
       setMessagesSeen((prev) => ({
         ...prev,
         [otherUser.id]: false,
@@ -117,8 +121,6 @@ export default function ChatInput({
 
   return (
     <>
-
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
@@ -130,7 +132,12 @@ export default function ChatInput({
                   <div className="relative p-4 pb-6">
                     <button
                       type="button"
-                      onClick={() => {}}
+                      onClick={() =>
+                        setFileMessageModal({
+                          apiUrl,
+                          query,
+                        })
+                      }
                       className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
                     >
                       <Plus className="text-white dark:text-[#313338]" />
@@ -163,8 +170,13 @@ export default function ChatInput({
       </Form>
       <Popover open={editableChat.id ? true : false}>
         <PopoverTrigger></PopoverTrigger>
-        <PopoverContent className="flex items-center gap-x-3 dark:bg-neutral-500 mb-[6rem] w-fit" align="start">
-          <p className="font-bold italic">{editableChat.id && editableChat.content}</p>
+        <PopoverContent
+          className="flex items-center gap-x-3 dark:bg-neutral-500 mb-[6rem] w-fit"
+          align="start"
+        >
+          <p className="font-bold italic">
+            {editableChat.id && editableChat.content}
+          </p>
           <Button size="icon" variant="ghost">
             <X onClick={handleResetEditableChat} />
           </Button>
