@@ -14,18 +14,21 @@ import {
 } from "@/components/ui/context-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ThreeDots } from "react-loader-spinner";
 
 import { useStateContext } from "@/contexts/state-context";
 
 export default function Sidebar() {
-  const { friendRequests, friendsList } = useStateContext();
+  const { friendRequests, friendsList, usersTyping } = useStateContext();
   const pathname = usePathname();
+
+  const FIXED_MODES = ["chat", "video"];
+
+  const mode = FIXED_MODES.includes(
+    pathname?.split("/")[1] ? pathname?.split("/")[1] : ""
+  )
+    ? pathname?.split("/")[1]
+    : "chat";
 
   const currentSelectedUserId = pathname?.split("/")[2];
 
@@ -55,7 +58,7 @@ export default function Sidebar() {
                 <p>Awww... you don&apos;t have any friends :/</p>
               ) : (
                 friendsList.map((friendObj) => (
-                  <Link href={`/chat/${friendObj.id}`} key={friendObj.id}>
+                  <Link href={`/${mode}/${friendObj.id}`} key={friendObj.id}>
                     <ContextMenu>
                       <ContextMenuTrigger asChild>
                         <Button
@@ -76,30 +79,30 @@ export default function Sidebar() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col items-start gap-y-1">
-                            <span className={`${
-                            currentSelectedUserId === friendObj.id
-                              ? "font-bold"
-                              : ""
-                          } text-base`}>
+                            <span
+                              className={`${
+                                currentSelectedUserId === friendObj.id
+                                  ? "font-bold"
+                                  : ""
+                              } text-base`}
+                            >
                               {friendObj.name.length > 16
                                 ? friendObj.name.substring(0, 16)
                                 : friendObj.name}
                             </span>
 
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span
-                                    className={`text-gray-400 dark:text-gray-200 text-xs`}
-                                  >
-                                    hey whats...
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>hey whatsup, i hope you are doing well.</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            {usersTyping[friendObj.id] && (
+                              <ThreeDots
+                                height="20"
+                                width="30"
+                                radius="9"
+                                color="gray"
+                                ariaLabel="three-dots-loading"
+                                visible={true}
+                                wrapperStyle={{}}
+                                wrapperClass=""
+                              />
+                            )}
                           </div>
                         </Button>
                       </ContextMenuTrigger>

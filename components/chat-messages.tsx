@@ -22,27 +22,31 @@ export default function ChatMessages({
   chatId,
   chats,
 }: ChatMessagesProps) {
-  const { directMessages, usersTyping, messagesSeen } = useStateContext();
+  const { directMessages, usersTyping } = useStateContext();
 
   const messageRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const dmKey = `chat:${chatId}:messages`;
 
-  useChat({ dmKey, chats, messageRef, chatId, member, otherMember });
+  const { showSeen } = useChat({ dmKey, chats, messageRef, chatId, member, otherMember });
 
   const isRightSide = (messageProfileId: string) => {
     return messageProfileId === member.id;
   };
 
-  const handleShowSeenMessage = () => {
-    if (!directMessages[chatId]) return;
+  // const handleShowSeenMessage = () => {
+  //   if (!directMessages[chatId]) return;
 
-    return (
-      directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
-        member.id && messagesSeen[otherMember.id]
-    );
-  };
+  //   return (
+  //     // (directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
+  //     //   member.id &&
+  //     //   messagesSeen[otherMember.id]) ||
+  //     (directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
+  //       member.id &&
+  //       directMessages[chatId][directMessages[chatId]?.length - 1].seen)
+  //   );
+  // };
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -52,7 +56,10 @@ export default function ChatMessages({
   }, [directMessages[chatId]]);
 
   return (
-    <div ref={chatContainerRef} className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto">
+    <div
+      ref={chatContainerRef}
+      className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto"
+    >
       <div className="w-full space-y-2 text-white">
         {directMessages[chatId]?.map((message) => {
           return (
@@ -87,7 +94,7 @@ export default function ChatMessages({
             </m.div>
           );
         })}
-        {handleShowSeenMessage() && (
+        {showSeen && (
           <p className="flex justify-end text-gray-400 text-sm font-bold">
             seen
           </p>

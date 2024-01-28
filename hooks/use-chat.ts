@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useSocket } from "@/contexts/socket";
 import { useStateContext } from "@/contexts/state-context";
@@ -25,8 +25,9 @@ export const useChat = ({
   otherMember,
 }: useChatProps) => {
   const { socket } = useSocket();
-  const { setDirectMessages, directMessages, setMessagesSeen } =
-    useStateContext();
+  const { setDirectMessages, directMessages } = useStateContext();
+
+  const [showSeen, setShowSeen] = useState(false);
 
   useEffect(() => {
     if (!chats) return;
@@ -58,25 +59,24 @@ export const useChat = ({
 
     // @ts-ignore
     socket.on(`messageSeen:${chatId}:${otherMember.id}`, (data) => {
-      setMessagesSeen((prev) => {
-        return {
-          ...prev,
-          [data.profile.id]: true,
-        };
-      });
+      if (
+        directMessages[chatId][directMessages[chatId].length - 1].profileId ===
+        member.id
+      ) {
+        setShowSeen(true);
+      }
     });
 
     socket.on(`updateChat:${chatId}`, (data: DirectMessage) => {
       setDirectMessages((prev) => {
         let prevMessagesOfAParticularConversation = prev[chatId] || [];
-        prevMessagesOfAParticularConversation = prevMessagesOfAParticularConversation.map(
-          (message) => {
+        prevMessagesOfAParticularConversation =
+          prevMessagesOfAParticularConversation.map((message) => {
             if (message.id === data.id) {
               return data;
             }
             return message;
-          }
-        );
+          });
         return {
           ...prev,
           [chatId]: prevMessagesOfAParticularConversation,
@@ -98,10 +98,9 @@ export const useChat = ({
             socket.emit("messageSeen", {
               conversationId: chatId,
               profile: member,
+              messageId:
+                directMessages[chatId][directMessages[chatId].length - 1].id,
             });
-            entry.target.classList.add("animate-bounce");
-          } else {
-            entry.target.classList.remove("animate-bounce");
           }
         });
       },
@@ -118,4 +117,19 @@ export const useChat = ({
       }
     };
   }, [directMessages[chatId]]);
+
+  useEffect(() => {
+    if (!directMessages[chatId]) return;
+
+    const lastMessage =
+      directMessages[chatId][directMessages[chatId].length - 1];
+
+    if (lastMessage?.seen && lastMessage?.profileId === member.id) {
+      setShowSeen(true);
+    } else {
+      setShowSeen(false);
+    }
+  }, [directMessages]);
+
+  return { showSeen };
 };
