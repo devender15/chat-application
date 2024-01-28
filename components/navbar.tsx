@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
@@ -10,6 +11,8 @@ import {
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+  NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 
 import { StatusIndicator } from "./status-indicator";
@@ -17,8 +20,13 @@ import { StatusIndicator } from "./status-indicator";
 import { UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
+  const path = usePathname();
 
+  const currentPath = path?.split("/")[1];
 
+  const isActive = (pathname: string) => {
+    return currentPath === pathname;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background h-16 px-10">
@@ -32,24 +40,36 @@ export default function Navbar() {
                 <NavigationMenuContent>
                   <ul className="grid w-[200px] gap-3 p-4">
                     <li>
-                      <Link href="/chat">
-                        <Button
-                          variant="secondary"
-                          className="w-full justify-start"
+                      <Link href="/chat" legacyBehavior passHref>
+                        <NavigationMenuLink
+                          className={navigationMenuTriggerStyle()}
                         >
-                          Chat
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            className={`w-full justify-start ${
+                              isActive("chat") ? "bg-accent/50" : ""
+                            }`}
+                          >
+                            Chat
+                          </Button>
+                        </NavigationMenuLink>
                       </Link>
                     </li>
 
                     <li>
-                      <Link href="/video">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
+                      <Link href="/video" legacyBehavior passHref>
+                        <NavigationMenuLink
+                          className={navigationMenuTriggerStyle()}
                         >
-                          Video Call
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            className={`w-full justify-start ${
+                              isActive("video") ? "bg-accent/50" : ""
+                            }`}
+                          >
+                            Video Call
+                          </Button>
+                        </NavigationMenuLink>
                       </Link>
                     </li>
                   </ul>
