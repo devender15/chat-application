@@ -1,16 +1,16 @@
-import { MessageSquare } from "lucide-react";
+import { Video } from "lucide-react";
 
 export default function Page() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-y-4">
       <div className="flex flex-col items-center">
-        <MessageSquare size={100} className="animate-bounce" />
-        <h1 className="text-3xl font-semibold">Start Chatting</h1>
+        <Video size={100} className="animate-bounce" />
+        <h1 className="text-3xl font-semibold">Start Video Chat</h1>
       </div>
       <div>
         <p className="text-gray-500">
-          Select a friend from left side and start conversation with your friend
-          right now!
+          Select a friend from left side and start video conversation with your
+          friend right now!
         </p>
       </div>
     </div>
