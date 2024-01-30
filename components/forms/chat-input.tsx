@@ -97,11 +97,6 @@ export default function ChatInput({
       }
 
       setHasStartedTyping(false);
-
-      setMessagesSeen((prev) => ({
-        ...prev,
-        [otherUser.id]: false,
-      }));
     } catch (err) {
       console.log(err);
     }
