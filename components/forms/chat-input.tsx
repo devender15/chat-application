@@ -48,7 +48,6 @@ export default function ChatInput({
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
 
   const {
-    setMessagesSeen,
     editableChat,
     setEditableChat,
     setFileMessageModal,
