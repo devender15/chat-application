@@ -15,11 +15,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThreeDots } from "react-loader-spinner";
+import FriendsLoader from "./skeletons/friendsLoader";
 
 import { useStateContext } from "@/contexts/state-context";
 
 export default function Sidebar() {
-  const { friendRequests, friendsList, usersTyping } = useStateContext();
+  const { friendRequests, friendsList, usersTyping, fetchingFriends } =
+    useStateContext();
   const pathname = usePathname();
 
   const FIXED_MODES = ["chat", "video"];
@@ -54,7 +56,9 @@ export default function Sidebar() {
           </h2>
           <div className="space-y-1">
             <ScrollArea className="h-[400px] w-full">
-              {friendsList.length === 0 ? (
+              {fetchingFriends ? (
+                <FriendsLoader />
+              ) : friendsList.length === 0 ? (
                 <p>Awww... you don&apos;t have any friends :/</p>
               ) : (
                 friendsList.map((friendObj) => (

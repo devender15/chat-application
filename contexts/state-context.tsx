@@ -17,6 +17,7 @@ import { useSocket } from "./socket";
 import { handleFetchFriendRequests } from "@/lib/utils";
 
 import { DirectMessage } from "@prisma/client";
+import { set } from "zod";
 
 type DirectMessageState = Record<string, DirectMessage[]>;
 
@@ -25,6 +26,7 @@ type StateContextType = {
   setFriendRequests: React.Dispatch<React.SetStateAction<Profile[]>>;
   friendsList: Profile[];
   setFriendsList: React.Dispatch<React.SetStateAction<Profile[]>>;
+  fetchingFriends: boolean;
   directMessages: DirectMessageState;
   setDirectMessages: React.Dispatch<React.SetStateAction<DirectMessageState>>;
   usersTyping: Record<string, boolean>;
@@ -32,7 +34,9 @@ type StateContextType = {
   editableChat: Record<string, string>;
   setEditableChat: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   fileMessageModal: Record<string, string | Record<string, any>>;
-  setFileMessageModal: React.Dispatch<React.SetStateAction<Record<string, string  | Record<string, any>>>>;
+  setFileMessageModal: React.Dispatch<
+    React.SetStateAction<Record<string, string | Record<string, any>>>
+  >;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -40,10 +44,13 @@ export const StateContext = createContext({} as StateContextType);
 export function StateContextProvider({ children }: { children: ReactNode }) {
   const [friendRequests, setFriendRequests] = useState<Profile[]>([]);
   const [friendsList, setFriendsList] = useState<Profile[]>([]);
+  const [fetchingFriends, setFetchingFriends] = useState<boolean>(true);
   const [directMessages, setDirectMessages] = useState<DirectMessageState>({});
   const [usersTyping, setUsersTyping] = useState<Record<string, boolean>>({});
   const [editableChat, setEditableChat] = useState<Record<string, string>>({});
-  const [fileMessageModal, setFileMessageModal] = useState<Record<string, string | Record<string, any>>>({
+  const [fileMessageModal, setFileMessageModal] = useState<
+    Record<string, string | Record<string, any>>
+  >({
     apiUrl: "",
     query: {},
   });
@@ -80,8 +87,15 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
   }, [user, socket]);
 
   const handleGetFriendsList = async () => {
-    const res = await axios.get("/api/friends");
-    setFriendsList(res.data);
+    try {
+      setFetchingFriends(true);
+      const res = await axios.get("/api/friends");
+      setFriendsList(res.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setFetchingFriends(false);
+    }
   };
 
   return (
@@ -91,6 +105,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setFriendRequests,
         friendsList,
         setFriendsList,
+        fetchingFriends,
         directMessages,
         setDirectMessages,
         usersTyping,
