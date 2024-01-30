@@ -61,7 +61,10 @@ export const useChat = ({
     socket.on(`messageSeen:${chatId}:${otherMember.id}`, (data) => {
       if (
         directMessages[chatId][directMessages[chatId].length - 1].profileId ===
-        member.id
+          member.id &&
+        data.messageId ===
+          directMessages[chatId][directMessages[chatId].length - 1].id &&
+        directMessages[chatId][directMessages[chatId].length - 1].seen
       ) {
         setShowSeen(true);
       }
