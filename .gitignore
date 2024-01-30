@@ -39,3 +39,8 @@ next-env.d.ts
 # fastapi 
 __pycache__
 venv
+
+# docker
+Dockerfile
+compose.yml
+.dockerignore
