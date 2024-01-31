@@ -1,8 +1,10 @@
 import { currentProfile } from "@/lib/current-profile";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { getOrCreateConversation } from "@/lib/conversation";
 
 import ChatHeader from "@/components/chat-header";
+import VideoScreen from "@/components/video-screen";
 
 interface MemberIdPageProps {
   params: {
@@ -15,13 +17,30 @@ export default async function Page({ params }: MemberIdPageProps) {
 
   if (!profile) redirect("/video");
 
-  const otherMember = await db.profile.findUnique({
+  const friend = await db.friend.findFirst({
     where: {
-      id: params.id,
+      userId: profile.id,
+      friends: {
+        some: {
+          id: params.id,
+        },
+      },
     },
   });
 
-  if (!otherMember) redirect("/video");
+  if (!friend) {
+    redirect("/video");
+  }
+
+  const conversation = await getOrCreateConversation(profile.id, params.id);
+
+  if (!conversation) {
+    redirect("/video");
+  }
+
+  const { memberOne, memberTwo } = conversation;
+
+  const otherMember = memberOne.id === profile.id ? memberTwo : memberOne;
 
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
@@ -29,6 +48,7 @@ export default async function Page({ params }: MemberIdPageProps) {
         memberImageUrl={otherMember?.imageUrl}
         memberName={otherMember.name}
       />
+      <VideoScreen conversationId={conversation.id} currentMember={profile} otherMember={otherMember} />
     </div>
   );
 }

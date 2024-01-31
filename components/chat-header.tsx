@@ -10,7 +10,7 @@ export default function ChatHeader({
   memberImageUrl,
 }: ChatHeaderProps) {
   return (
-    <div className="flex justify-between w-full items-center mb-4">
+    <div className="flex justify-between w-full items-center">
       <div className="flex items-center gap-x-3">
         <Avatar>
           <AvatarImage src={memberImageUrl} />
