@@ -60,31 +60,32 @@ export default async function Page({ params }: MemberIdPageProps) {
   });
 
   return (
-    <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
+    <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-6 w-full h-full">
       <ChatHeader
         memberName={otherMember.name}
         memberImageUrl={otherMember.imageUrl}
       />
-
-      <ChatMessages
-        member={profile}
-        otherMember={otherMember}
-        chatId={conversation.id}
-        chats={chatsOfThisConversation}
-      />
-
-      <div className="w-[80%] mx-auto">
-        <ChatInput
-          apiUrl="/api/socket/chats"
-          type="conversation"
-          otherUser={otherMember}
-          query={{
-            conversationId: conversation.id,
-          }}
-          currentUser={profile}
-          conversationId={conversation.id}
+      {/* <section> */}
+        <ChatMessages
+          member={profile}
+          otherMember={otherMember}
+          chatId={conversation.id}
+          chats={chatsOfThisConversation}
         />
-      </div>
+
+        <div className="w-[80%] mx-auto">
+          <ChatInput
+            apiUrl="/api/socket/chats"
+            type="conversation"
+            otherUser={otherMember}
+            query={{
+              conversationId: conversation.id,
+            }}
+            currentUser={profile}
+            conversationId={conversation.id}
+          />
+        </div>
+      {/* </section> */}
     </div>
   );
 }
