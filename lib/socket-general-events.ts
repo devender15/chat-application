@@ -46,6 +46,7 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
   });
 
   socket.on("ice-candidate", (candidate: RTCIceCandidate, roomId: string) => {
+    console.log(candidate);
     socket.broadcast.to(roomId).emit(`icecandidate:${roomId}`, candidate);
   });
 

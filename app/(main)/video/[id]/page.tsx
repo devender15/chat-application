@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getOrCreateConversation } from "@/lib/conversation";
 
-import ChatHeader from "@/components/chat-header";
 import VideoScreen from "@/components/video-screen";
 
 interface MemberIdPageProps {
@@ -44,10 +43,6 @@ export default async function Page({ params }: MemberIdPageProps) {
 
   return (
     <div className="px-10 py-6 flex flex-col justify-center items-center gap-y-2 w-full h-full">
-      <ChatHeader
-        memberImageUrl={otherMember?.imageUrl}
-        memberName={otherMember.name}
-      />
       <VideoScreen conversationId={conversation.id} currentMember={profile} otherMember={otherMember} />
     </div>
   );

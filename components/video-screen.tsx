@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { useSocket } from "@/contexts/socket";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import VideoControls from "./video-controls";
 
 import { Profile } from "@prisma/client";
 
@@ -63,17 +64,17 @@ export default function VideoScreen({
     navigator.mediaDevices
       .getUserMedia(VIDEO_CONSTRAINTS)
       .then((stream) => {
-        // selfStreamRef.current = stream;
-        // if (videoRefSelf.current) {
-        //   videoRefSelf.current.srcObject = stream;
-        // }
-        // if (videoRefSelf.current) {
-        //   videoRefSelf.current.onloadedmetadata = () => {
-        //     videoRefSelf.current?.play();
-        //   };
+        selfStreamRef.current = stream;
+        if (videoRefSelf.current) {
+          videoRefSelf.current.srcObject = stream;
+        }
+        if (videoRefSelf.current) {
+          videoRefSelf.current.onloadedmetadata = () => {
+            videoRefSelf.current?.play();
+          };
 
-        //   socket.emit("ready", { roomId: conversationId });
-        // }
+          socket.emit("ready", { roomId: conversationId });
+        }
         socket.emit("ready", { roomId: conversationId });
       })
       .catch((err) => {
@@ -263,43 +264,61 @@ export default function VideoScreen({
   }, [conversationId, socket]);
 
   return (
-    <div className="min-h-[80svh] overflow-y-auto flex-grow flex-col gap-4 items-center">
-      <div className="flex gap-x-4 items-center">
-        <div className="w-[20rem] h-[20rem] border rounded-md shadow-sm">
-          {videoRefSelf.current ? (
-            <video autoPlay ref={videoRefSelf} className="w-full h-full" />
+    <div className="min-h-[80svh] w-full overflow-y-auto flex-grow flex-col gap-4 items-center">
+      <div className="flex gap-x-4 h-full w-full items-center relative justify-center">
+        <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
+          {/* <video
+            autoPlay
+            ref={userVideoRef}
+            className="w-full h-full object-cover rounded-xl"
+          /> */}
+          {cameraActive ? (
+            <video
+              autoPlay
+              ref={videoRefSelf}
+              className="w-full h-full object-cover rounded-xl"
+            />
           ) : (
-            <div className="w-full h-full flex justify-center items-center">
-            <Avatar>
-              <AvatarImage src={currentMember.imageUrl} />
-              <AvatarFallback>
-                {currentMember.name.substring(0, 1)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="w-full h-full flex justify-center items-center bg-gray-400/50 rounded-xl">
+              <Avatar>
+                <AvatarImage src={currentMember.imageUrl} />
+                <AvatarFallback>
+                  {currentMember.name.substring(0, 1)}
+                </AvatarFallback>
+              </Avatar>
             </div>
           )}
         </div>
-        <div className="w-[20rem] h-[20rem] border rounded-md shadow-sm">
-          {videoRefOther.current ? (
-            <video autoPlay ref={videoRefOther} className="w-full h-full" />
+        <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
+          <video
+            autoPlay
+            ref={videoRefOther}
+            className="w-full h-full object-cover rounded-xl"
+          />
+          {/* {cameraActive ? (
+            <video
+              autoPlay
+              ref={peerVideoRef}
+              className="w-full h-full object-cover rounded-xl"
+            />
           ) : (
             <div className="w-full h-full flex justify-center items-center">
-            <Avatar>
-              <AvatarImage src={otherMember.imageUrl} />
-              <AvatarFallback>
-                {otherMember.name.substring(0, 1)}
-              </AvatarFallback>
-            </Avatar>
+              <Avatar>
+                <AvatarImage src={otherMember.imageUrl} />
+                <AvatarFallback>
+                  {otherMember.name.substring(0, 1)}
+                </AvatarFallback>
+              </Avatar>
             </div>
-          )}
+          )} */}
         </div>
+
+        <VideoControls
+          toggleCamera={toggleCamera}
+          handleLeaveRoom={handleLeaveRoom}
+          cameraActive={cameraActive}
+        />
       </div>
-      <button onClick={toggleCamera} type="button">
-        {cameraActive ? "Stop Camera" : "Start Camera"}
-      </button>
-      <button onClick={handleLeaveRoom} type="button">
-        Leave
-      </button>
     </div>
   );
 }
