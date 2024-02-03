@@ -15,6 +15,15 @@ interface VideoScreenProps {
   otherMember: Profile;
 }
 
+const ICE_SERVERS = {
+  iceServers: [
+    {
+      // urls: "stun:openrelay.metered.ca:80",
+      urls: "stun:stun2.1.google.com:19302",
+    },
+  ],
+};
+
 export default function VideoScreen({
   conversationId,
   currentMember,
@@ -22,22 +31,23 @@ export default function VideoScreen({
 }: VideoScreenProps) {
   const videoRefSelf = useRef<HTMLVideoElement | null>(null);
   const videoRefOther = useRef<HTMLVideoElement | null>(null);
-  const rtcConnectionRef = useRef<RTCPeerConnection>(null);
+  const rtcConnectionRef = useRef<RTCPeerConnection | null>(null);
   const selfStreamRef = useRef<MediaStream | null>(null);
   const hostRef = useRef<boolean>(false);
 
   const router = useRouter();
   const [cameraActive, setCameraActive] = useState(true);
+  const [micActive, setMicActive] = useState(false);
 
   const { socket } = useSocket();
 
   const VIDEO_CONSTRAINTS = {
     audio: true,
-    // video: {
-    //   width: { min: 640, ideal: 1920, max: 1920 },
-    //   height: { min: 480, ideal: 1080, max: 1080 },
-    // },
-    video: { width: 500, height: 500 },
+    video: {
+      width: { min: 640, ideal: 1920, max: 1920 },
+      height: { min: 480, ideal: 1080, max: 1080 },
+    },
+    // video: { width: 500, height: 500 },
   };
 
   const handleRoomCreated = () => {
@@ -73,7 +83,7 @@ export default function VideoScreen({
             videoRefSelf.current?.play();
           };
 
-          socket.emit("ready", { roomId: conversationId });
+          // socket.emit("ready", { roomId: conversationId });
         }
         socket.emit("ready", { roomId: conversationId });
       })
@@ -87,11 +97,13 @@ export default function VideoScreen({
       rtcConnectionRef.current = createPeerConnection();
 
       rtcConnectionRef.current?.addTrack(
+        //@ts-ignore
         selfStreamRef.current?.getTracks()[0],
         selfStreamRef.current
       );
 
       rtcConnectionRef.current?.addTrack(
+        //@ts-ignore
         selfStreamRef.current?.getTracks()[1],
         selfStreamRef.current
       );
@@ -108,68 +120,109 @@ export default function VideoScreen({
     }
   };
 
-  const ICE_SERVERS = {
-    iceServers: [
-      {
-        urls: "stun:openrelay.metered.ca:80",
-      },
-    ],
+  const handleNegotiationNeededEvent = async () => {
+    try {
+      const newOffer = await rtcConnectionRef.current?.createOffer();
+      if (newOffer) {
+        await rtcConnectionRef.current?.setLocalDescription(newOffer);
+        if (rtcConnectionRef.current) {
+          socket.emit(
+            "offer",
+            rtcConnectionRef.current.localDescription,
+            conversationId
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Error handling renegotiation:", err);
+    }
   };
 
   const createPeerConnection = () => {
     const connection = new RTCPeerConnection(ICE_SERVERS);
+    console.log(connection);
     connection.onicecandidate = handleIceCandidateEvent;
+    connection.onnegotiationneeded = handleNegotiationNeededEvent;
     connection.ontrack = handleTrackEvent;
     return connection;
   };
 
-  const handleReceivedOffer = (offer) => {
+  const handleReceivedOffer = (offer: RTCSessionDescriptionInit) => {
+    console.log(offer);
+
     if (!hostRef.current) {
       rtcConnectionRef.current = createPeerConnection();
+      console.log(rtcConnectionRef.current?.signalingState);
+      if (
+        rtcConnectionRef.current?.signalingState === "have-local-offer" ||
+        rtcConnectionRef.current?.signalingState === "have-remote-offer" ||
+        rtcConnectionRef.current?.signalingState === "stable"
+      ) {
+        rtcConnectionRef.current
+          ?.setRemoteDescription(offer)
+          .then(() => {
+            selfStreamRef.current?.getTracks().forEach((track) => {
+              rtcConnectionRef.current?.addTrack(track, selfStreamRef.current!);
+            });
 
-      rtcConnectionRef.current.addTrack(
-        selfStreamRef.current?.getTracks()[0],
-        selfStreamRef.current
-      );
-
-      rtcConnectionRef.current.addTrack(
-        selfStreamRef.current?.getTracks()[1],
-        selfStreamRef.current
-      );
-
-      rtcConnectionRef.current.setRemoteDescription(offer);
-
-      rtcConnectionRef.current
-        .createAnswer()
-        .then((answer) => {
-          rtcConnectionRef.current?.setLocalDescription(answer);
-          socket.emit("answer", answer, conversationId);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+            return rtcConnectionRef.current?.createAnswer();
+          })
+          .then((answer) =>
+            rtcConnectionRef.current?.setLocalDescription(answer)
+          )
+          .then(() => {
+            if (rtcConnectionRef.current) {
+              socket.emit(
+                "answer",
+                rtcConnectionRef.current.localDescription,
+                conversationId
+              );
+            }
+          })
+          .catch((err) => {
+            console.error("Error handling received offer:", err);
+          });
+      } else {
+        console.warn(
+          "Invalid signaling state for setting remote answer:",
+          rtcConnectionRef.current?.signalingState
+        );
+      }
     }
   };
 
-  const handleAnswer = (answer) => {
-    rtcConnectionRef.current?.setRemoteDescription(answer).catch((err) => {
-      console.log(err);
-    });
+  const handleAnswer = (answer: RTCSessionDescription) => {
+    console.log(rtcConnectionRef.current?.currentRemoteDescription);
+    if (!rtcConnectionRef.current?.currentRemoteDescription) {
+      rtcConnectionRef.current?.setRemoteDescription(answer).catch((err) => {
+        console.log(err);
+      });
+    }
   };
 
-  const handleIceCandidateEvent = (event) => {
+  const handleIceCandidateEvent = (event: RTCPeerConnectionIceEvent) => {
     if (event.candidate) {
+      console.log(event.candidate);
       socket.emit("ice-candidate", event.candidate, conversationId);
     }
   };
 
-  const handleNewIceCandidateMsg = (incoming) => {
-    const candidate = new RTCIceCandidate(incoming);
-    rtcConnectionRef.current?.addIceCandidate(candidate).catch((err) => {
-      console.log(err);
-    });
-  };
+  const handleNewIceCandidateMsg = (incoming: RTCIceCandidate) => {
+    console.log(incoming);
 
+    console.log(rtcConnectionRef.current?.remoteDescription);
+
+    if (rtcConnectionRef.current?.remoteDescription) {
+      console.log("remote description already set!");
+      const candidate = new RTCIceCandidate(incoming);
+      rtcConnectionRef.current?.addIceCandidate(candidate).catch((err) => {
+        console.error("Error adding ice candidate:", err);
+      });
+    } else {
+      console.warn("Remote description is null. Ice candidate not added.");
+    }
+  };
+  //@ts-ignore
   const handleTrackEvent = (event) => {
     if (videoRefOther.current) {
       videoRefOther.current.srcObject = event.streams[0];
@@ -181,13 +234,17 @@ export default function VideoScreen({
 
     if (videoRefSelf.current?.srcObject) {
       videoRefSelf.current.srcObject
+        //@ts-ignore
         .getTracks()
+        //@ts-ignore
         .forEach((track) => track.stop());
     }
 
     if (videoRefOther.current?.srcObject) {
       videoRefOther.current.srcObject
+        //@ts-ignore
         .getTracks()
+        //@ts-ignore
         .forEach((track) => track.stop());
     }
 
@@ -206,7 +263,9 @@ export default function VideoScreen({
 
     if (videoRefOther.current?.srcObject) {
       videoRefOther.current.srcObject
+        //@ts-ignore
         .getTracks()
+        //@ts-ignore
         .forEach((track) => track.stop());
     }
 
@@ -218,7 +277,7 @@ export default function VideoScreen({
     }
   };
 
-  const toggleMediaStream = (type, state) => {
+  const toggleMediaStream = (type: string, state: boolean) => {
     selfStreamRef.current?.getTracks().forEach((track) => {
       if (track.kind === type) {
         // eslint-disable-next-line no-param-reassign
@@ -234,17 +293,19 @@ export default function VideoScreen({
     setCameraActive((prev) => !prev);
   };
 
+  const toggleMic = () => {
+    toggleMediaStream("audio", micActive);
+
+    setMicActive((prev) => !prev);
+  };
+
   useEffect(() => {
     if (socket) {
-      socket.emit("roomJoin", { roomId: conversationId });
-
-      //@ts-ignore
-      socket.on(`roomCreated:${conversationId}`, handleRoomCreated);
-      //@ts-ignore
-      socket.on(`roomJoined:${conversationId}`, handleRoomJoined);
-      //@ts-ignore
-      socket.on(`roomFull:${conversationId}`, (data) => {
-        console.log(data);
+      socket.emit("join", { roomId: conversationId });
+      socket.on(`created`, handleRoomCreated);
+      socket.on(`joined`, handleRoomJoined);
+      socket.on(`full`, () => {
+        router.push("/video");
       });
 
       socket.on("ready", handleInitiateCall);
@@ -267,11 +328,6 @@ export default function VideoScreen({
     <div className="min-h-[80svh] w-full overflow-y-auto flex-grow flex-col gap-4 items-center">
       <div className="flex gap-x-4 h-full w-full items-center relative justify-center">
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
-          {/* <video
-            autoPlay
-            ref={userVideoRef}
-            className="w-full h-full object-cover rounded-xl"
-          /> */}
           {cameraActive ? (
             <video
               autoPlay

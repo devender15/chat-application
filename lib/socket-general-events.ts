@@ -23,18 +23,18 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
   });
 
   // handling webrtc events using this signal server
-  socket.on("roomJoin", (data) => {
+  socket.on("join", (data) => {
     const { rooms } = io.sockets.adapter;
     const room = rooms.get(data.roomId);
 
     if (!room) {
       socket.join(data.roomId);
-      socket.emit(`roomCreated:${data.roomId}`, data);
+      socket.emit(`created`, data);
     } else if (room.size === 1) {
       socket.join(data.roomId);
-      socket.emit(`roomJoined:${data.roomId}`, data);
+      socket.emit(`joined`, data);
     } else {
-      socket.emit(`roomFull:${data.roomId}`, data);
+      socket.emit(`full`, data);
     }
 
     console.log(rooms);
@@ -42,24 +42,24 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
 
 
   socket.on("ready", (data) => {
-    socket.broadcast.to(data.roomId).emit(`ready:${data.roomId}`);
+    socket.broadcast.to(data.roomId).emit(`ready`);
   });
 
   socket.on("ice-candidate", (candidate: RTCIceCandidate, roomId: string) => {
-    console.log(candidate);
-    socket.broadcast.to(roomId).emit(`icecandidate:${roomId}`, candidate);
+    // console.log(candidate);
+    socket.broadcast.to(roomId).emit(`ice-candidate`, candidate);
   });
 
   socket.on("offer", (offer, roomId) => {
-    socket.broadcast.to(roomId).emit(`offer:${roomId}`, offer);
+    socket.broadcast.to(roomId).emit(`offer`, offer);
   });
 
   socket.on("answer", (answer, roomId) => {
-    socket.broadcast.to(roomId).emit(`answer:${roomId}`, answer);
+    socket.broadcast.to(roomId).emit(`answer`, answer);
   });
 
   socket.on("leave", (data) => {
-    socket.broadcast.to(data.roomId).emit(`leave:${data.roomId}`);
     socket.leave(data.roomId);
+    socket.broadcast.to(data.roomId).emit(`leave`);
   });
 };
