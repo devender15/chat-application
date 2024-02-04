@@ -19,7 +19,6 @@ interface VideoScreenProps {
 const ICE_SERVERS = {
   iceServers: [
     {
-      // urls: "stun:openrelay.metered.ca:80",
       urls: "stun:stun2.1.google.com:19302",
     },
   ],
@@ -42,14 +41,17 @@ export default function VideoScreen({
 
   const [cameraActive, setCameraActive] = useState(true);
   const [micActive, setMicActive] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const VIDEO_CONSTRAINTS = {
-    audio: true,
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+    },
     video: {
       width: { min: 640, ideal: 1920, max: 1920 },
       height: { min: 480, ideal: 1080, max: 1080 },
     },
-    // video: { width: 500, height: 500 },
   };
 
   const handleRoomCreated = () => {
@@ -268,6 +270,46 @@ export default function VideoScreen({
     }
   };
 
+  const handleStartScreenShare = () => {
+    navigator.mediaDevices
+      .getDisplayMedia({ video: true, audio: false })
+      .then((stream) => {
+        selfStreamRef.current = stream;
+        if (videoRefSelf.current) {
+          videoRefSelf.current.srcObject = stream;
+          setIsScreenSharing(true);
+        }
+        if (videoRefSelf.current) {
+          videoRefSelf.current.onloadedmetadata = () => {
+            videoRefSelf.current?.play();
+          };
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handleStopScreenShare = () => {
+    navigator.mediaDevices
+      .getUserMedia(VIDEO_CONSTRAINTS)
+      .then((stream) => {
+        selfStreamRef.current = stream;
+        if (videoRefSelf.current) {
+          videoRefSelf.current.srcObject = stream;
+          setIsScreenSharing(false);
+        }
+        if (videoRefSelf.current) {
+          videoRefSelf.current.onloadedmetadata = () => {
+            videoRefSelf.current?.play();
+          };
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   const toggleMediaStream = (type: string, state: boolean) => {
     selfStreamRef.current?.getTracks().forEach((track) => {
       if (track.kind === type) {
@@ -326,7 +368,7 @@ export default function VideoScreen({
   }, [conversationId, socket]);
 
   return (
-    <div className="min-h-[80svh] w-full overflow-y-auto flex-grow flex-col gap-4 items-center">
+    <div className="min-h-[80svh] w-full  flex-grow flex-col gap-4 items-center">
       <div className="flex gap-x-4 h-full w-full items-center relative justify-center">
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
@@ -381,6 +423,9 @@ export default function VideoScreen({
           handleLeaveRoom={handleLeaveRoom}
           cameraActive={cameraActive}
           micActive={micActive}
+          handleStartScreenShare={handleStartScreenShare}
+          handleStopScreenShare={handleStopScreenShare}
+          isScreenSharing={isScreenSharing}
         />
       </div>
     </div>
