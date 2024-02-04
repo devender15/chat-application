@@ -32,7 +32,7 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
       socket.emit(`created`, data);
     } else if (room.size === 1) {
       socket.join(data.roomId);
-      socket.emit(`joined:`, data);
+      socket.emit(`joined`, data);
     } else {
       socket.emit(`full`, data);
     }
