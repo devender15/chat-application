@@ -369,7 +369,7 @@ export default function VideoScreen({
 
   return (
     <div className="min-h-[80svh] w-full  flex-grow flex-col gap-4 items-center">
-      <div className="flex gap-x-4 h-full w-full items-center relative justify-center">
+      <div className="flex flex-col md:!flex-row gap-4 h-full w-full items-center relative justify-center">
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
             autoPlay
@@ -393,7 +393,7 @@ export default function VideoScreen({
             </div>
           )} */}
         </div>
-        <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
+        <div className="w-full md:basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
             autoPlay
             ref={videoRefOther}

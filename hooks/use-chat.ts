@@ -28,6 +28,7 @@ export const useChat = ({
   const { setDirectMessages, directMessages } = useStateContext();
 
   const [showSeen, setShowSeen] = useState(false);
+  const [showScrollToBottomButton, setShowScrollToBottomButton] = useState(false);
 
   useEffect(() => {
     if (!chats) return;
@@ -134,5 +135,21 @@ export const useChat = ({
     }
   }, [directMessages]);
 
-  return { showSeen };
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolledToBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+
+      setShowScrollToBottomButton(!scrolledToBottom);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+
+  return { showSeen, showScrollToBottomButton };
 };

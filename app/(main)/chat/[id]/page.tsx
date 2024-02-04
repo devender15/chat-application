@@ -65,27 +65,25 @@ export default async function Page({ params }: MemberIdPageProps) {
         memberName={otherMember.name}
         memberImageUrl={otherMember.imageUrl}
       />
-      {/* <section> */}
-        <ChatMessages
-          member={profile}
-          otherMember={otherMember}
-          chatId={conversation.id}
-          chats={chatsOfThisConversation}
-        />
+      <ChatMessages
+        member={profile}
+        otherMember={otherMember}
+        chatId={conversation.id}
+        chats={chatsOfThisConversation}
+      />
 
-        <div className="w-[80%] mx-auto">
-          <ChatInput
-            apiUrl="/api/socket/chats"
-            type="conversation"
-            otherUser={otherMember}
-            query={{
-              conversationId: conversation.id,
-            }}
-            currentUser={profile}
-            conversationId={conversation.id}
-          />
-        </div>
-      {/* </section> */}
+      <div className="w-[55%] mx-auto absolute bottom-2">
+        <ChatInput
+          apiUrl="/api/socket/chats"
+          type="conversation"
+          otherUser={otherMember}
+          query={{
+            conversationId: conversation.id,
+          }}
+          currentUser={profile}
+          conversationId={conversation.id}
+        />
+      </div>
     </div>
   );
 }

@@ -9,6 +9,9 @@ import ChatBubble from "./chat-bubble";
 import { ThreeDots } from "react-loader-spinner";
 import { useRef, useEffect } from "react";
 
+import { MoveDown } from "lucide-react";
+import { Button } from "./ui/button";
+
 interface ChatMessagesProps {
   member: Profile;
   otherMember: Profile;
@@ -29,7 +32,14 @@ export default function ChatMessages({
 
   const dmKey = `chat:${chatId}:messages`;
 
-  const { showSeen } = useChat({ dmKey, chats, messageRef, chatId, member, otherMember });
+  const { showSeen, showScrollToBottomButton } = useChat({
+    dmKey,
+    chats,
+    messageRef,
+    chatId,
+    member,
+    otherMember,
+  });
 
   const isRightSide = (messageProfileId: string) => {
     return messageProfileId === member.id;
@@ -48,6 +58,13 @@ export default function ChatMessages({
   //   );
   // };
 
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
@@ -58,9 +75,9 @@ export default function ChatMessages({
   return (
     <div
       ref={chatContainerRef}
-      className="bg-gray-200/90 dark:bg-gray-800  rounded-sm shadow-md p-4 w-full h-full max-h-full overflow-y-auto"
+      className="bg-gray-200/90 dark:bg-gray-800  rounded-md shadow-md p-4 w-full h-full max-h-full overflow-y-auto relative"
     >
-      <div className="w-full space-y-2 text-white">
+      <div className="w-full space-y-2 text-white relative">
         {directMessages[chatId]?.map((message) => {
           return (
             <m.div
@@ -98,6 +115,14 @@ export default function ChatMessages({
           <p className="flex justify-end text-gray-400 text-sm font-bold">
             seen
           </p>
+        )}
+
+        {showScrollToBottomButton && (
+          <div className="fixed bottom-12 right-14">
+            <Button size="icon" onClick={scrollToBottom}>
+              <MoveDown size={20} />
+            </Button>
+          </div>
         )}
 
         {usersTyping[otherMember.id] && (

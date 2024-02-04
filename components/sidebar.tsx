@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "./ui/button";
+import { ChevronLeft } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiNotification } from "react-icons/bi";
 import {
@@ -13,6 +15,12 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThreeDots } from "react-loader-spinner";
 import FriendsLoader from "./skeletons/friendsLoader";
@@ -23,6 +31,7 @@ export default function Sidebar() {
   const { friendRequests, friendsList, usersTyping, fetchingFriends } =
     useStateContext();
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const FIXED_MODES = ["chat", "video"];
 
@@ -34,24 +43,48 @@ export default function Sidebar() {
 
   const currentSelectedUserId = pathname?.split("/")[2];
 
+  const handleToggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <div className="border-r h-full w-full">
-      <div className="space-y-4 p-4">
+    <div
+      className={`border-r h-full ${
+        isCollapsed ? "w-fit" : "basis-[20%]"
+      } !transition-all duration-500 ease-out`}
+    >
+      <div className={`space-y-4 py-4 ${isCollapsed ? "px-1" : "px-4"}`}>
         <div className="px-3 py-2 flex flex-col gap-y-2">
           <Link href="/add-friend">
-            <Button className="w-full">
-              <FaUserFriends className="mr-2 h-4 w-4" /> Add a new friend
+            <Button
+              size={isCollapsed ? "icon" : "default"}
+              className={`${isCollapsed ? "w-fit py-2 px-4" : "w-full"}`}
+            >
+              <FaUserFriends
+                className={`${isCollapsed ? "h-7 w-7" : "h-4 w-4 mr-2"}`}
+              />{" "}
+              {!isCollapsed && "Add a new friend"}
             </Button>
           </Link>
           <Link href="/friend-requests">
-            <Button className="w-full">
-              <BiNotification className="mr-2 h-4 w-4" /> Friend Requests{" "}
+            <Button
+              size={isCollapsed ? "icon" : "default"}
+              className={`${isCollapsed ? "w-fit py-2 px-4" : "w-full"}`}
+            >
+              <BiNotification
+                className={`${isCollapsed ? "h-7 w-7" : "h-4 w-4 mr-2"}`}
+              />{" "}
+              {!isCollapsed && "Friend Requests"}{" "}
               {friendRequests.length > 0 ? `(${friendRequests.length})` : ""}
             </Button>
           </Link>
         </div>
         <div className="px-3 py-2">
-          <h2 className="mb-2 py-4 text-lg font-semibold tracking-tight">
+          <h2
+            className={`mb-2 py-4 ${
+              isCollapsed ? "text-sm" : "text-lg"
+            } font-semibold tracking-tight`}
+          >
             Friends ( {friendsList.length} )
           </h2>
           <div className="space-y-1">
@@ -67,7 +100,9 @@ export default function Sidebar() {
                       <ContextMenuTrigger asChild>
                         <Button
                           variant="secondary"
-                          className={`w-full justify-start flex items-center gap-x-3 h-16 mb-3 ${
+                          className={`${
+                            isCollapsed ? "w-fit" : "w-full"
+                          } justify-start flex items-center gap-x-3 h-16 mb-3 ${
                             currentSelectedUserId === friendObj.id
                               ? "bg-primary/25"
                               : ""
@@ -82,32 +117,34 @@ export default function Sidebar() {
                               {friendObj.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex flex-col items-start gap-y-1">
-                            <span
-                              className={`${
-                                currentSelectedUserId === friendObj.id
-                                  ? "font-bold"
-                                  : ""
-                              } text-base`}
-                            >
-                              {friendObj.name.length > 16
-                                ? friendObj.name.substring(0, 16)
-                                : friendObj.name}
-                            </span>
+                          {!isCollapsed && (
+                            <div className="flex flex-col items-start gap-y-1">
+                              <span
+                                className={`${
+                                  currentSelectedUserId === friendObj.id
+                                    ? "font-bold"
+                                    : ""
+                                } text-base`}
+                              >
+                                {friendObj.name.length > 16
+                                  ? friendObj.name.substring(0, 16)
+                                  : friendObj.name}
+                              </span>
 
-                            {usersTyping[friendObj.id] && (
-                              <ThreeDots
-                                height="20"
-                                width="30"
-                                radius="9"
-                                color="gray"
-                                ariaLabel="three-dots-loading"
-                                visible={true}
-                                wrapperStyle={{}}
-                                wrapperClass=""
-                              />
-                            )}
-                          </div>
+                              {usersTyping[friendObj.id] && (
+                                <ThreeDots
+                                  height="20"
+                                  width="30"
+                                  radius="9"
+                                  color="gray"
+                                  ariaLabel="three-dots-loading"
+                                  visible={true}
+                                  wrapperStyle={{}}
+                                  wrapperClass=""
+                                />
+                              )}
+                            </div>
+                          )}
                         </Button>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
@@ -119,6 +156,19 @@ export default function Sidebar() {
               )}
             </ScrollArea>
           </div>
+        </div>
+        <div
+          className={`w-full flex ${
+            isCollapsed ? "justify-center" : "justify-start"
+          }`}
+        >
+          <Button onClick={handleToggleCollapse}>
+            <ChevronLeft
+              className={`h-5 w-5 transform ${
+                isCollapsed ? "rotate-180" : "rotate-0"
+              }`}
+            />
+          </Button>
         </div>
       </div>
     </div>

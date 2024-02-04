@@ -99,26 +99,26 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
           </div>
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent>
+      <ContextMenuContent className="dark:bg-gray-800/70 bg-neutral-400/50 backdrop-blur-sm shadow-md">
         {direction === "right" && !message.deleted ? (
           <>
             <ContextMenuItem
               onClick={() => handleCopyText(message.content)}
-              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 text-left"
             >
               <Copy className="h-5 w-5" />
               Copy
             </ContextMenuItem>
             <ContextMenuItem
               onClick={handleEditChat}
-              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 text-left"
             >
               <Pencil className="h-5 w-5" />
               Edit
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => handleDeleteChat(message.id)}
-              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+              className="w-full h-full flex justify-center items-center gap-x-4 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 text-left"
             >
               <Trash2 className="h-5 w-5" />
               Delete
@@ -127,7 +127,7 @@ export default function ChatBubble({ message, direction }: ChatBubbleProps) {
         ) : (
           <ContextMenuItem
             onClick={() => handleCopyText(message.content)}
-            className="w-full h-full flex justify-center items-center gap-x-4 text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 text-left"
+            className="w-full h-full flex justify-center items-center gap-x-4 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 text-left"
           >
             <Copy className="h-5 w-5" />
             Copy
