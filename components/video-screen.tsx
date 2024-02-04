@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { useSocket } from "@/contexts/socket";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
 import VideoControls from "./video-controls";
 
 import { Profile } from "@prisma/client";
@@ -35,11 +36,12 @@ export default function VideoScreen({
   const selfStreamRef = useRef<MediaStream | null>(null);
   const hostRef = useRef<boolean>(false);
 
+  const { toast } = useToast();
+  const { socket } = useSocket();
   const router = useRouter();
+
   const [cameraActive, setCameraActive] = useState(true);
   const [micActive, setMicActive] = useState(false);
-
-  const { socket } = useSocket();
 
   const VIDEO_CONSTRAINTS = {
     audio: true,
@@ -82,8 +84,6 @@ export default function VideoScreen({
           videoRefSelf.current.onloadedmetadata = () => {
             videoRefSelf.current?.play();
           };
-
-          // socket.emit("ready", { roomId: conversationId });
         }
         socket.emit("ready", { roomId: conversationId });
       })
@@ -140,7 +140,6 @@ export default function VideoScreen({
 
   const createPeerConnection = () => {
     const connection = new RTCPeerConnection(ICE_SERVERS);
-    console.log(connection);
     connection.onicecandidate = handleIceCandidateEvent;
     connection.onnegotiationneeded = handleNegotiationNeededEvent;
     connection.ontrack = handleTrackEvent;
@@ -148,11 +147,8 @@ export default function VideoScreen({
   };
 
   const handleReceivedOffer = (offer: RTCSessionDescriptionInit) => {
-    console.log(offer);
-
     if (!hostRef.current) {
       rtcConnectionRef.current = createPeerConnection();
-      console.log(rtcConnectionRef.current?.signalingState);
       if (
         rtcConnectionRef.current?.signalingState === "have-local-offer" ||
         rtcConnectionRef.current?.signalingState === "have-remote-offer" ||
@@ -202,18 +198,12 @@ export default function VideoScreen({
 
   const handleIceCandidateEvent = (event: RTCPeerConnectionIceEvent) => {
     if (event.candidate) {
-      console.log(event.candidate);
       socket.emit("ice-candidate", event.candidate, conversationId);
     }
   };
 
   const handleNewIceCandidateMsg = (incoming: RTCIceCandidate) => {
-    console.log(incoming);
-
-    console.log(rtcConnectionRef.current?.remoteDescription);
-
     if (rtcConnectionRef.current?.remoteDescription) {
-      console.log("remote description already set!");
       const candidate = new RTCIceCandidate(incoming);
       rtcConnectionRef.current?.addIceCandidate(candidate).catch((err) => {
         console.error("Error adding ice candidate:", err);
@@ -230,7 +220,7 @@ export default function VideoScreen({
   };
 
   const handleLeaveRoom = () => {
-    socket.emit("leave", { roomId: conversationId });
+    socket.emit("leave", { roomId: conversationId, member: currentMember });
 
     if (videoRefSelf.current?.srcObject) {
       videoRefSelf.current.srcObject
@@ -256,6 +246,7 @@ export default function VideoScreen({
     }
 
     router.push("/video");
+    router.refresh();
   };
 
   const onPeerLeave = () => {
@@ -289,7 +280,6 @@ export default function VideoScreen({
 
   const toggleCamera = () => {
     toggleMediaStream("video", cameraActive);
-
     setCameraActive((prev) => !prev);
   };
 
@@ -301,16 +291,36 @@ export default function VideoScreen({
 
   useEffect(() => {
     if (socket) {
-      socket.emit("join", { roomId: conversationId });
-      socket.on(`created`, handleRoomCreated);
-      socket.on(`joined`, handleRoomJoined);
+      socket.emit("join", { roomId: conversationId, member: currentMember });
+      socket.on(`created:${conversationId}`, handleRoomCreated);
+      socket.on(`joined:${conversationId}`, ({ member }: { roomId: string; member: Profile }) => {
+        handleRoomJoined();
+        toast({
+          title: `${
+            member.id === currentMember.id ? "You" : member.name
+          } joined the meeting!`,
+        });
+      });
+
       socket.on(`full`, () => {
         router.push("/video");
+        toast({
+          title: "Room already full!",
+        });
       });
 
       socket.on("ready", handleInitiateCall);
 
-      socket.on("leave", onPeerLeave);
+      socket.on(
+        "leave",
+        // ({ roomId, member }: { roomId: string; member: Profile }) => {
+        //   onPeerLeave();
+        //   toast({
+        //     title: `${member.name} left the meeting!`,
+        //   });
+        // }
+        onPeerLeave()
+      );
 
       socket.on("offer", handleReceivedOffer);
       socket.on("answer", handleAnswer);
@@ -319,7 +329,7 @@ export default function VideoScreen({
 
     return () => {
       if (socket) {
-        socket.emit("leave", { roomId: conversationId });
+        socket.emit("leave", { roomId: conversationId, member: currentMember });
       }
     };
   }, [conversationId, socket]);
@@ -328,7 +338,12 @@ export default function VideoScreen({
     <div className="min-h-[80svh] w-full overflow-y-auto flex-grow flex-col gap-4 items-center">
       <div className="flex gap-x-4 h-full w-full items-center relative justify-center">
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
-          {cameraActive ? (
+          <video
+            autoPlay
+            ref={videoRefSelf}
+            className="w-full h-full object-cover rounded-xl"
+          />
+          {/* {cameraActive ? (
             <video
               autoPlay
               ref={videoRefSelf}
@@ -343,7 +358,7 @@ export default function VideoScreen({
                 </AvatarFallback>
               </Avatar>
             </div>
-          )}
+          )} */}
         </div>
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
@@ -371,8 +386,10 @@ export default function VideoScreen({
 
         <VideoControls
           toggleCamera={toggleCamera}
+          toggleMic={toggleMic}
           handleLeaveRoom={handleLeaveRoom}
           cameraActive={cameraActive}
+          micActive={micActive}
         />
       </div>
     </div>

@@ -29,15 +29,13 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
 
     if (!room) {
       socket.join(data.roomId);
-      socket.emit(`created`, data);
+      io.emit(`created:${data.roomId}`, data);
     } else if (room.size === 1) {
       socket.join(data.roomId);
-      socket.emit(`joined`, data);
+      io.emit(`joined:${data.roomId}`, data);
     } else {
       socket.emit(`full`, data);
     }
-
-    console.log(rooms);
   });
 
 
@@ -46,7 +44,6 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
   });
 
   socket.on("ice-candidate", (candidate: RTCIceCandidate, roomId: string) => {
-    // console.log(candidate);
     socket.broadcast.to(roomId).emit(`ice-candidate`, candidate);
   });
 
@@ -60,6 +57,6 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
 
   socket.on("leave", (data) => {
     socket.leave(data.roomId);
-    socket.broadcast.to(data.roomId).emit(`leave`);
+    socket.broadcast.to(data.roomId).emit(`leave`, data);
   });
 };

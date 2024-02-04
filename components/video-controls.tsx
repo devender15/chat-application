@@ -5,14 +5,18 @@ import { Video, VideoOff, MonitorUp, X, Mic, MicOff } from "lucide-react";
 
 interface VideoControlProps {
   toggleCamera: () => void;
+  toggleMic: () => void;
   handleLeaveRoom: () => void;
   cameraActive: boolean;
+  micActive: boolean;
 }
 
 export default function VideoControls({
   toggleCamera,
+  toggleMic,
   handleLeaveRoom,
   cameraActive,
+  micActive,
 }: VideoControlProps) {
   return (
     <div className="rounded-xl p-2 bg-neutral-500/80 dark:bg-gray-800/80 w-[80%] mx-auto h-16 absolute bottom-2">
@@ -26,8 +30,8 @@ export default function VideoControls({
         </li>
         <li>
           <Toggle asChild className="p-2">
-            <Button size="icon" variant="ghost">
-              <Mic size={35} />
+            <Button size="icon" variant="ghost" onClick={toggleMic}>
+              {micActive ? <Mic size={35} /> : <MicOff size={35} />}
             </Button>
           </Toggle>
         </li>
