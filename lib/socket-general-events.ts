@@ -29,10 +29,10 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
 
     if (!room) {
       socket.join(data.roomId);
-      io.emit(`created:${data.roomId}`, data);
+      socket.emit(`created`, data);
     } else if (room.size === 1) {
       socket.join(data.roomId);
-      io.emit(`joined:${data.roomId}`, data);
+      socket.emit(`joined:`, data);
     } else {
       socket.emit(`full`, data);
     }

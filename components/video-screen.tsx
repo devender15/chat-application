@@ -292,8 +292,8 @@ export default function VideoScreen({
   useEffect(() => {
     if (socket) {
       socket.emit("join", { roomId: conversationId, member: currentMember });
-      socket.on(`created:${conversationId}`, handleRoomCreated);
-      socket.on(`joined:${conversationId}`, ({ member }: { roomId: string; member: Profile }) => {
+      socket.on(`created`, handleRoomCreated);
+      socket.on(`joined`, ({ member }: { roomId: string; member: Profile }) => {
         handleRoomJoined();
         toast({
           title: `${
@@ -311,16 +311,7 @@ export default function VideoScreen({
 
       socket.on("ready", handleInitiateCall);
 
-      socket.on(
-        "leave",
-        // ({ roomId, member }: { roomId: string; member: Profile }) => {
-        //   onPeerLeave();
-        //   toast({
-        //     title: `${member.name} left the meeting!`,
-        //   });
-        // }
-        onPeerLeave()
-      );
+      socket.on("leave", onPeerLeave);
 
       socket.on("offer", handleReceivedOffer);
       socket.on("answer", handleAnswer);
