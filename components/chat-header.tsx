@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import VideoButton from "./video-button";
 
 interface ChatHeaderProps {
   memberName: string;
@@ -19,7 +20,9 @@ export default function ChatHeader({
 
         <p className="font-semibold">{memberName}</p>
       </div>
-      <div></div>
+      <div>
+        <VideoButton />
+      </div>
     </div>
   );
 }

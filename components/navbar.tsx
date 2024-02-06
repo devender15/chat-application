@@ -33,7 +33,7 @@ export default function Navbar() {
       <nav className="w-full h-full flex justify-between items-center">
         <div className="flex items-center gap-x-4">
           <h1 className="text-2xl font-semibold">socialhope</h1>
-          <NavigationMenu>
+          {/* <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Options</NavigationMenuTrigger>
@@ -76,7 +76,7 @@ export default function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
-          </NavigationMenu>
+          </NavigationMenu> */}
 
           <StatusIndicator />
         </div>

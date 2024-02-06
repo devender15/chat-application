@@ -247,8 +247,7 @@ export default function VideoScreen({
       rtcConnectionRef.current = null;
     }
 
-    router.push("/video");
-    router.refresh();
+    router.push(`/chat/${otherMember.id}`);
   };
 
   const onPeerLeave = () => {
@@ -345,7 +344,7 @@ export default function VideoScreen({
       });
 
       socket.on(`full`, () => {
-        router.push("/video");
+        router.push("/chat");
         toast({
           title: "Room already full!",
         });

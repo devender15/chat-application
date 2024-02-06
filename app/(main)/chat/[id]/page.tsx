@@ -1,5 +1,3 @@
-import ChatInput from "@/components/forms/chat-input";
-
 import { redirectToSignIn } from "@clerk/nextjs";
 import { currentProfile } from "@/lib/current-profile";
 import { getOrCreateConversation } from "@/lib/conversation";
@@ -7,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 
 import ChatHeader from "@/components/chat-header";
-import ChatMessages from "@/components/chat-messages";
+import ScreenController from "@/components/screen-controller";
 
 interface MemberIdPageProps {
   params: {
@@ -66,27 +64,12 @@ export default async function Page({ params }: MemberIdPageProps) {
         memberImageUrl={otherMember.imageUrl}
       />
 
-      <section className="w-full h-full flex flex-col gap-y-4 justify-center items-center bg-gray-200/90 dark:bg-gray-800  rounded-md shadow-md">
-        <ChatMessages
-          member={profile}
-          otherMember={otherMember}
-          chatId={conversation.id}
-          chats={chatsOfThisConversation}
-        />
-
-        <div className="w-[80%] mx-auto">
-          <ChatInput
-            apiUrl="/api/socket/chats"
-            type="conversation"
-            otherUser={otherMember}
-            query={{
-              conversationId: conversation.id,
-            }}
-            currentUser={profile}
-            conversationId={conversation.id}
-          />
-        </div>
-      </section>
+      <ScreenController
+        currentMember={profile}
+        otherMember={otherMember}
+        chats={chatsOfThisConversation}
+        conversationId={conversation.id}
+      />
     </div>
   );
 }
