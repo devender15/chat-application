@@ -124,7 +124,7 @@ export default function Sidebar() {
                                   currentSelectedUserId === friendObj.id
                                     ? "font-bold"
                                     : ""
-                                } text-base`}
+                                } text-sm`}
                               >
                                 {friendObj.name.length > 16
                                   ? friendObj.name.substring(0, 16)
