@@ -25,10 +25,12 @@ export const useChat = ({
   otherMember,
 }: useChatProps) => {
   const { socket } = useSocket();
-  const { setDirectMessages, directMessages } = useStateContext();
+  const { setDirectMessages, directMessages, messagesSeen, setMessagesSeen } =
+    useStateContext();
 
   const [showSeen, setShowSeen] = useState(false);
-  const [showScrollToBottomButton, setShowScrollToBottomButton] = useState(false);
+  const [showScrollToBottomButton, setShowScrollToBottomButton] =
+    useState(false);
 
   useEffect(() => {
     if (!chats) return;
@@ -59,16 +61,13 @@ export const useChat = ({
     });
 
     // @ts-ignore
-    socket.on(`messageSeen:${chatId}:${otherMember.id}`, (data) => {
-      if (
-        directMessages[chatId][directMessages[chatId].length - 1].profileId ===
-          member.id &&
-        data.messageId ===
-          directMessages[chatId][directMessages[chatId].length - 1].id &&
-        directMessages[chatId][directMessages[chatId].length - 1].seen
-      ) {
-        setShowSeen(true);
-      }
+    socket.on(`messageSeen:${chatId}:${otherMember.id}`, () => {
+      setMessagesSeen((prev) => {
+        return {
+          ...prev,
+          [otherMember.id]: true,
+        };
+      });
     });
 
     socket.on(`updateChat:${chatId}`, (data: DirectMessage) => {
@@ -128,12 +127,15 @@ export const useChat = ({
     const lastMessage =
       directMessages[chatId][directMessages[chatId].length - 1];
 
-    if (lastMessage?.seen && lastMessage?.profileId === member.id) {
+    if (
+      (lastMessage?.seen && lastMessage?.profileId === member.id) ||
+      (messagesSeen[otherMember.id] && lastMessage?.profileId === member.id)
+    ) {
       setShowSeen(true);
     } else {
       setShowSeen(false);
     }
-  }, [directMessages]);
+  }, [directMessages, messagesSeen, chatId, member.id]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,13 +145,12 @@ export const useChat = ({
       setShowScrollToBottomButton(!scrolledToBottom);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
 
   return { showSeen, showScrollToBottomButton };
 };

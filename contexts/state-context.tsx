@@ -17,7 +17,6 @@ import { useSocket } from "./socket";
 import { handleFetchFriendRequests } from "@/lib/utils";
 
 import { DirectMessage } from "@prisma/client";
-import { set } from "zod";
 
 type DirectMessageState = Record<string, DirectMessage[]>;
 
@@ -33,6 +32,8 @@ type StateContextType = {
   setUsersTyping: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   editableChat: Record<string, string>;
   setEditableChat: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  messagesSeen: Record<string, boolean>;
+  setMessagesSeen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   fileMessageModal: Record<string, string | Record<string, any>>;
   setFileMessageModal: React.Dispatch<
     React.SetStateAction<Record<string, string | Record<string, any>>>
@@ -46,6 +47,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
   const [friendsList, setFriendsList] = useState<Profile[]>([]);
   const [fetchingFriends, setFetchingFriends] = useState<boolean>(true);
   const [directMessages, setDirectMessages] = useState<DirectMessageState>({});
+  const [messagesSeen, setMessagesSeen] = useState<Record<string, boolean>>({});
   const [usersTyping, setUsersTyping] = useState<Record<string, boolean>>({});
   const [editableChat, setEditableChat] = useState<Record<string, string>>({});
   const [fileMessageModal, setFileMessageModal] = useState<
@@ -114,6 +116,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setEditableChat,
         fileMessageModal,
         setFileMessageModal,
+        messagesSeen,
+        setMessagesSeen,
       }}
     >
       {children}

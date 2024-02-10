@@ -51,6 +51,7 @@ export default function ChatInput({
     editableChat,
     setEditableChat,
     setFileMessageModal,
+    setMessagesSeen,
   } = useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,6 +98,12 @@ export default function ChatInput({
       }
 
       setHasStartedTyping(false);
+      setMessagesSeen((prev) => {
+        return {
+          ...prev,
+          [otherUser.id]: false,
+        };
+      });
     } catch (err) {
       console.log(err);
     }

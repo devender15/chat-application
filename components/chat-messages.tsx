@@ -45,19 +45,6 @@ export default function ChatMessages({
     return messageProfileId === member.id;
   };
 
-  // const handleShowSeenMessage = () => {
-  //   if (!directMessages[chatId]) return;
-
-  //   return (
-  //     // (directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
-  //     //   member.id &&
-  //     //   messagesSeen[otherMember.id]) ||
-  //     (directMessages[chatId][directMessages[chatId]?.length - 1].profileId ===
-  //       member.id &&
-  //       directMessages[chatId][directMessages[chatId]?.length - 1].seen)
-  //   );
-  // };
-
   const scrollToBottom = () => {
     window.scrollTo({
       top: document.body.scrollHeight,
@@ -112,7 +99,7 @@ export default function ChatMessages({
           );
         })}
         {showSeen && (
-          <p className="flex justify-end text-gray-400 text-sm font-bold">
+          <p className="flex justify-end text-gray-400 text-xs font-semibold italic">
             seen
           </p>
         )}
