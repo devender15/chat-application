@@ -30,7 +30,7 @@ export default function ChatMessages({
   const messageRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const dmKey = `chat:${chatId}:messages`;
+  const dmKey = `chat:${chatId}:${member.id}:messages`;
 
   const { showSeen, showScrollToBottomButton } = useChat({
     dmKey,
