@@ -15,7 +15,7 @@
     "@emoji-mart/data": "^1.1.2",
     "@emoji-mart/react": "^1.1.1",
     "@hookform/resolvers": "^3.3.2",
-    "@prisma/client": "^5.8.1",
+    "@prisma/client": "^5.9.1",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-context-menu": "^2.1.5",
@@ -62,7 +62,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.1",
     "postcss": "^8",
-    "prisma": "^5.8.1",
+    "prisma": "^5.9.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

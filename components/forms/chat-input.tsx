@@ -52,6 +52,7 @@ export default function ChatInput({
     setEditableChat,
     setFileMessageModal,
     setMessagesSeen,
+    setDirectMessages,
   } = useStateContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -93,8 +94,33 @@ export default function ChatInput({
           query,
         });
 
-        await axios.post(url, { content, fileUrl });
+        const newMessage = {
+          content,
+          fileUrl,
+          status: "COMPLETED",
+          conversationId,
+          senderId: currentUser.id,
+          receiverId: otherUser.id,
+          createdAt: new Date().toISOString(),
+        };
+
+        // @ts-ignore
+        setDirectMessages((prev) => {
+          const prevMessagesOfAParticularConversation =
+            prev[conversationId] || [];
+          return {
+            ...prev,
+            [conversationId]: [
+              ...prevMessagesOfAParticularConversation,
+              newMessage,
+            ],
+          };
+        });
+
         form.reset();
+
+        await axios.post(url, { content, fileUrl });
+        
       }
 
       setHasStartedTyping(false);
@@ -144,7 +170,6 @@ export default function ChatInput({
                       <Plus className="text-white dark:text-[#313338]" />
                     </button>
                     <Input
-                      disabled={isLoading}
                       className="px-14 py-6 bg-gray-100/90 shadow-md dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                       placeholder={`Message ${otherUser.name}...`}
                       onChangeCapture={() => setHasStartedTyping(true)}

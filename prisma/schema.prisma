@@ -80,10 +80,16 @@ model Conversation {
   @@unique([memberOneId, memberTwoId])
 }
 
+enum Status {
+  SENDING
+  COMPLETED
+}
+
 model DirectMessage {
   id String @id @default(uuid())
   content String @db.Text
   fileUrl String @db.Text
+  status Status @default(SENDING)
 
   profileId String
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)

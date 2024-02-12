@@ -60,8 +60,17 @@ export default async function handler(
         ? conversation.memberOne
         : conversation.memberTwo;
 
+    const otherMember =
+      conversation.memberOne.id !== profile.id
+        ? conversation.memberOne
+        : conversation.memberTwo;
+
     if (!member) {
       return res.status(404).json({ message: "Member not found!" });
+    }
+
+    if (!otherMember) {
+      return res.status(404).json({ message: "Other member not found!" });
     }
 
     const message = await db.directMessage.create({
@@ -76,7 +85,7 @@ export default async function handler(
       },
     });
 
-    const dmKey = `chat:${conversationId}:messages`;
+    const dmKey = `chat:${conversationId}:${otherMember.id}:messages`;
 
     res?.socket?.server?.io?.emit(dmKey, message);
 
