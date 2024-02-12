@@ -1,12 +1,6 @@
 import { MessageSquare } from "lucide-react";
 
-import { redirect } from "next/navigation";
-
-export default function Page() {
-
-
-  redirect("/");
-
+export default function Home() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-y-4">
       <div className="flex flex-col items-center">
