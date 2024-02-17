@@ -16,9 +16,9 @@ export default function RootLayout({
   return (
     <>
       <Navbar />
-      <main className="flex items-center justify-between overflow-hidden h-[calc(100vh-4rem)]">
+      <main className="flex-1 flex items-center justify-between overflow-hidden h-[calc(100vh-4rem)]">
         <Sidebar />
-        <div className="flex-1 h-full bg-gray-100 dark:bg-gray-900 p-2 !transition-all duration-500 ease-in">
+        <div className="flex flex-1 h-full bg-gray-100 dark:bg-gray-900 p-2 !transition-all duration-500 ease-in">
           {children}
         </div>
       </main>
