@@ -54,7 +54,7 @@ export default function Sidebar() {
       } !transition-all duration-500 ease-out flex overflow-x-hidden`}
     >
       {isCollapsed ? (
-        <div className="h-full flex justify-center items-center bg-[#111827]">
+        <div className="h-full flex justify-center items-center bg-[#f3f4f6] dark:bg-[#111827]">
           <button onClick={handleToggleCollapse}>
             <ChevronLeft
               className={`h-5 w-5 transform ${
@@ -64,7 +64,7 @@ export default function Sidebar() {
           </button>
         </div>
       ) : (
-        <div className={`space-y-4 border-r py-4 ${isCollapsed ? "px-1" : "px-4"}`}>
+        <div className={`space-y-4 dark:border-r py-4 px-4`}>
           <div className="px-3 py-2 flex flex-col gap-y-2">
             <Link href="/add-friend">
               <Button
@@ -111,9 +111,7 @@ export default function Sidebar() {
                         <ContextMenuTrigger asChild>
                           <Button
                             variant="secondary"
-                            className={`${
-                              isCollapsed ? "w-fit" : "w-full"
-                            } justify-start flex items-center gap-x-3 h-16 mb-3 ${
+                            className={`w-[250px] justify-start flex items-center gap-x-3 h-16 mb-3 ${
                               currentSelectedUserId === friendObj.id
                                 ? "bg-primary/25"
                                 : ""
@@ -171,7 +169,7 @@ export default function Sidebar() {
         </div>
       )}
 
-      <div className="h-full flex justify-center items-center bg-[#111827]">
+      <div className="h-full flex justify-center items-center border-r dark:border-r-0 dark:bg-[#111827]">
         <button onClick={handleToggleCollapse}>
           <ChevronLeft
             className={`h-5 w-5 transform ${
