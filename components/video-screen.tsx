@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useSocket } from "@/contexts/socket";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,7 +19,10 @@ interface VideoScreenProps {
 const ICE_SERVERS = {
   iceServers: [
     {
-      urls: "stun:stun2.1.google.com:19302",
+      urls: [
+        "stun:stun2.1.google.com:19302",
+        "stun:global.stun.twilio.com:3478",
+      ],
     },
   ],
 };
@@ -224,12 +227,16 @@ export default function VideoScreen({
   const handleLeaveRoom = () => {
     socket.emit("leave", { roomId: conversationId, member: currentMember });
 
-    if (videoRefSelf.current?.srcObject) {
-      videoRefSelf.current.srcObject
-        //@ts-ignore
-        .getTracks()
-        //@ts-ignore
-        .forEach((track) => track.stop());
+    if (videoRefSelf.current) {
+      const stream = videoRefSelf.current.srcObject;
+      //@ts-ignore
+      const tracks = stream.getTracks();
+      console.log(tracks);
+
+      for(const track of tracks) {
+        track.stop();
+      }
+      videoRefSelf.current.srcObject = null; 
     }
 
     if (videoRefOther.current?.srcObject) {
@@ -240,6 +247,8 @@ export default function VideoScreen({
         .forEach((track) => track.stop());
     }
 
+    rtcConnectionRef.current?.close();
+
     if (rtcConnectionRef.current) {
       rtcConnectionRef.current.ontrack = null;
       rtcConnectionRef.current.onicecandidate = null;
@@ -248,6 +257,7 @@ export default function VideoScreen({
     }
 
     router.push(`/chat/${otherMember.id}`);
+    router.refresh();
   };
 
   const onPeerLeave = () => {
@@ -334,14 +344,17 @@ export default function VideoScreen({
     if (socket) {
       socket.emit("join", { roomId: conversationId, member: currentMember });
       socket.on(`created`, handleRoomCreated);
-      socket.on(`joined`, ({ member }: { roomId: string; member: Profile }) => {
-        handleRoomJoined();
-        toast({
-          title: `${
-            member.id === currentMember.id ? "You" : member.name
-          } joined the meeting!`,
-        });
-      });
+      socket.on(
+        `joined:${conversationId}`,
+        ({ member }: { roomId: string; member: Profile }) => {
+          handleRoomJoined();
+          toast({
+            title: `${
+              member.id === currentMember.id ? "You" : member.name
+            } joined the meeting!`,
+          });
+        }
+      );
 
       socket.on(`full`, () => {
         router.push("/chat");
@@ -350,7 +363,7 @@ export default function VideoScreen({
         });
       });
 
-      socket.on("ready", handleInitiateCall);
+      // socket.on(`ready`, handleInitiateCall);
 
       socket.on("leave", onPeerLeave);
 
@@ -362,6 +375,15 @@ export default function VideoScreen({
     return () => {
       if (socket) {
         socket.emit("leave", { roomId: conversationId, member: currentMember });
+
+        socket.off(`created`, handleRoomCreated);
+        socket.off(`joined:${conversationId}`, handleRoomJoined);
+        socket.off(`full`);
+        socket.off("ready", handleInitiateCall);
+        socket.off("leave", onPeerLeave);
+        socket.off("offer", handleReceivedOffer);
+        socket.off("answer", handleAnswer);
+        socket.off("ice-candidate", handleNewIceCandidateMsg);
       }
     };
   }, [conversationId, socket]);
@@ -372,8 +394,9 @@ export default function VideoScreen({
         <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
             autoPlay
+            muted
             ref={videoRefSelf}
-            className="w-full h-full object-cover rounded-xl"
+            className="w-full h-full object-cover rounded-xl scale-x-[-1]"
           />
           {/* {cameraActive ? (
             <video
@@ -395,8 +418,9 @@ export default function VideoScreen({
         <div className="w-full md:basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
           <video
             autoPlay
+            muted
             ref={videoRefOther}
-            className="w-full h-full object-cover rounded-xl"
+            className="w-full h-full object-cover rounded-xl scale-x-[-1]"
           />
           {/* {cameraActive ? (
             <video
@@ -417,6 +441,7 @@ export default function VideoScreen({
         </div>
 
         <VideoControls
+          handleInitiateCall={handleInitiateCall}
           toggleCamera={toggleCamera}
           toggleMic={toggleMic}
           handleLeaveRoom={handleLeaveRoom}

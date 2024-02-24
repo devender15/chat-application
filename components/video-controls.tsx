@@ -4,9 +4,18 @@ import { Button } from "./ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { motion as m } from "framer-motion";
 
-import { Video, VideoOff, MonitorUp, X, Mic, MicOff } from "lucide-react";
+import {
+  Video,
+  VideoOff,
+  MonitorUp,
+  X,
+  Mic,
+  MicOff,
+  Radio,
+} from "lucide-react";
 
 interface VideoControlProps {
+  handleInitiateCall: () => void;
   toggleCamera: () => void;
   toggleMic: () => void;
   handleLeaveRoom: () => void;
@@ -18,6 +27,7 @@ interface VideoControlProps {
 }
 
 export default function VideoControls({
+  handleInitiateCall,
   toggleCamera,
   toggleMic,
   handleLeaveRoom,
@@ -68,6 +78,11 @@ export default function VideoControls({
               {micActive ? <Mic size={35} /> : <MicOff size={35} />}
             </Button>
           </Toggle>
+        </li>
+        <li>
+          <Button size="icon" variant="ghost" onClick={handleInitiateCall}>
+            <Radio size={35} />
+          </Button>
         </li>
         <li>
           <Toggle asChild className="p-2">

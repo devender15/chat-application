@@ -15,6 +15,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "socialhope | A chat app",
   description: "A chat app built with Next.js and Socket.io",
+  icons: {
+    icon: "/assets/logo.png"
+  }
 };
 
 export default function RootLayout({
