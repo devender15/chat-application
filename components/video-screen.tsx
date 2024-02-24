@@ -231,7 +231,7 @@ export default function VideoScreen({
       const stream = videoRefSelf.current.srcObject;
       //@ts-ignore
       const tracks = stream.getTracks();
-      console.log(tracks);
+      // console.log(tracks);
 
       for(const track of tracks) {
         track.stop();
@@ -450,6 +450,9 @@ export default function VideoScreen({
           handleStartScreenShare={handleStartScreenShare}
           handleStopScreenShare={handleStopScreenShare}
           isScreenSharing={isScreenSharing}
+          converstaionId={conversationId}
+          currentMember={currentMember}
+          otherMember={otherMember}
         />
       </div>
     </div>

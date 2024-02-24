@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { motion as m } from "framer-motion";
+import ChatInput from "./forms/chat-input";
 
 import {
   Video,
@@ -12,7 +13,18 @@ import {
   Mic,
   MicOff,
   Radio,
+  MessageSquareIcon,
 } from "lucide-react";
+
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+
+import { Profile } from "@prisma/client";
 
 interface VideoControlProps {
   handleInitiateCall: () => void;
@@ -24,6 +36,9 @@ interface VideoControlProps {
   cameraActive: boolean;
   micActive: boolean;
   isScreenSharing: boolean;
+  converstaionId: string;
+  currentMember: Profile;
+  otherMember: Profile;
 }
 
 export default function VideoControls({
@@ -36,6 +51,9 @@ export default function VideoControls({
   handleStartScreenShare,
   handleStopScreenShare,
   isScreenSharing,
+  converstaionId,
+  currentMember,
+  otherMember,
 }: VideoControlProps) {
   const [isMouseMoving, setIsMouseMoving] = useState(true);
 
@@ -96,6 +114,32 @@ export default function VideoControls({
               <MonitorUp size={35} />
             </Button>
           </Toggle>
+        </li>
+        <li>
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <MessageSquareIcon size={30} />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Send a quick note!</DrawerTitle>
+                <div className="w-[60%] mx-auto">
+                  <ChatInput
+                    apiUrl="/api/socket/chats"
+                    type="note"
+                    otherUser={otherMember}
+                    query={{
+                      conversationId: converstaionId,
+                    }}
+                    currentUser={currentMember}
+                    conversationId={converstaionId}
+                  />
+                </div>
+              </DrawerHeader>
+            </DrawerContent>
+          </Drawer>
         </li>
         <li>
           <Button

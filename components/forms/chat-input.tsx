@@ -32,7 +32,7 @@ interface ChatInputProps {
   apiUrl: string;
   query: Record<string, any>;
   otherUser: Profile;
-  type: "conversation";
+  type: "conversation" | "note";
   currentUser: Profile;
   conversationId: string;
 }
@@ -120,7 +120,6 @@ export default function ChatInput({
         form.reset();
 
         await axios.post(url, { content, fileUrl });
-        
       }
 
       setHasStartedTyping(false);
@@ -157,18 +156,21 @@ export default function ChatInput({
               <FormItem>
                 <FormControl>
                   <div className="relative p-4 pb-6">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFileMessageModal({
-                          apiUrl,
-                          query,
-                        })
-                      }
-                      className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
-                    >
-                      <Plus className="text-white dark:text-[#313338]" />
-                    </button>
+                    {type === "conversation" && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFileMessageModal({
+                            apiUrl,
+                            query,
+                          })
+                        }
+                        className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
+                      >
+                        <Plus className="text-white dark:text-[#313338]" />
+                      </button>
+                    )}
+
                     <Input
                       className="px-14 py-6 bg-gray-100/90 shadow-md dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                       placeholder={`Message ${otherUser.name}...`}
@@ -180,7 +182,12 @@ export default function ChatInput({
                       value={field.value}
                       name={field.name}
                     />
-                    <div className="absolute top-7 right-8">
+
+                    <div
+                      className={`absolute top-7 ${
+                        type === "conversation" ? "right-8" : "left-8"
+                      }`}
+                    >
                       <Emoji
                         onChange={(emoji: string) =>
                           field.onChange(`${field.value} ${emoji}`)
