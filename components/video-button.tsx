@@ -5,7 +5,7 @@ import qs from "query-string";
 
 import { Button } from "./ui/button";
 
-import { Video, VideoOff } from "lucide-react";
+import { Video } from "lucide-react";
 
 export default function VideoButton() {
   const router = useRouter();
@@ -28,9 +28,11 @@ export default function VideoButton() {
     router.push(url);
   };
 
-  return (
-    <Button variant="ghost" size="icon" onClick={handleToggleVideoCall}>
-      {isVideo ? <VideoOff size={24} /> : <Video size={24} />}
-    </Button>
-  );
+  if (!isVideo) {
+    return (
+      <Button variant="ghost" size="icon" onClick={handleToggleVideoCall}>
+        <Video size={24} />
+      </Button>
+    );
+  }
 }
