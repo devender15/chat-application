@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { motion as m } from "framer-motion";
 
 import { Button } from "./ui/button";
 import { ChevronLeft } from "lucide-react";
@@ -48,10 +49,12 @@ export default function Sidebar() {
   };
 
   return (
-    <div
+    <m.div
+      layout
+      transition={{ type: "tween" }}
       className={`h-full ${
         isCollapsed ? "w-[20px]" : "w-fit"
-      } !transition-all duration-500 ease-out flex overflow-x-hidden`}
+      }  flex overflow-x-hidden`}
     >
       {isCollapsed ? (
         <div className="h-full flex justify-center items-center bg-[#f3f4f6] dark:bg-[#111827]">
@@ -178,6 +181,6 @@ export default function Sidebar() {
           />
         </button>
       </div>
-    </div>
+    </m.div>
   );
 }

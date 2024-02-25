@@ -58,4 +58,12 @@ export const handleSocketGeneralEvents = (socket: Socket, io: ServerIO) => {
     socket.leave(data.roomId);
     socket.broadcast.to(data.roomId).emit(`leave`, data);
   });
+
+  socket.on("send-note", (data) => {
+    const { roomId, sender, receiver, content } = data;
+    io.emit(`note:${roomId}`, {
+      content,
+      sender,
+    });
+  });
 };

@@ -24,6 +24,8 @@ import qs from "query-string";
 
 import { X } from "lucide-react";
 
+import { useSocket } from "@/contexts/socket";
+
 const formSchema = z.object({
   content: z.string().min(1),
 });
@@ -55,6 +57,8 @@ export default function ChatInput({
     setDirectMessages,
   } = useStateContext();
 
+  const { socket } = useSocket();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,64 +77,78 @@ export default function ChatInput({
 
   const onSubmit = async (value: z.infer<typeof formSchema>) => {
     const { content } = value;
-    const fileUrl = "";
 
-    try {
-      if (editableChat.id) {
-        const url = qs.stringifyUrl({
-          url: `/api/socket/${editableChat.id}`,
-          query: {
-            chatId: editableChat.id,
+    if (type === "conversation") {
+      const fileUrl = "";
+
+      try {
+        if (editableChat.id) {
+          const url = qs.stringifyUrl({
+            url: `/api/socket/${editableChat.id}`,
+            query: {
+              chatId: editableChat.id,
+              conversationId,
+            },
+          });
+
+          await axios.patch(url, { content });
+
+          handleResetEditableChat();
+        } else {
+          const url = qs.stringifyUrl({
+            url: apiUrl,
+            query,
+          });
+
+          const newMessage = {
+            content,
+            fileUrl,
+            status: "COMPLETED",
             conversationId,
-          },
-        });
+            senderId: currentUser.id,
+            receiverId: otherUser.id,
+            createdAt: new Date().toISOString(),
+          };
 
-        await axios.patch(url, { content });
+          // @ts-ignore
+          setDirectMessages((prev) => {
+            const prevMessagesOfAParticularConversation =
+              prev[conversationId] || [];
+            return {
+              ...prev,
+              [conversationId]: [
+                ...prevMessagesOfAParticularConversation,
+                newMessage,
+              ],
+            };
+          });
 
-        handleResetEditableChat();
-      } else {
-        const url = qs.stringifyUrl({
-          url: apiUrl,
-          query,
-        });
+          form.reset();
 
-        const newMessage = {
-          content,
-          fileUrl,
-          status: "COMPLETED",
-          conversationId,
-          senderId: currentUser.id,
-          receiverId: otherUser.id,
-          createdAt: new Date().toISOString(),
-        };
+          await axios.post(url, { content, fileUrl });
+        }
 
-        // @ts-ignore
-        setDirectMessages((prev) => {
-          const prevMessagesOfAParticularConversation =
-            prev[conversationId] || [];
+        setHasStartedTyping(false);
+        setMessagesSeen((prev) => {
           return {
             ...prev,
-            [conversationId]: [
-              ...prevMessagesOfAParticularConversation,
-              newMessage,
-            ],
+            [otherUser.id]: false,
           };
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      if (socket) {
+        socket.emit(`send-note`, {
+          content,
+          sender: currentUser,
+          receiver: otherUser,
+          roomId: conversationId,
         });
 
         form.reset();
-
-        await axios.post(url, { content, fileUrl });
       }
-
-      setHasStartedTyping(false);
-      setMessagesSeen((prev) => {
-        return {
-          ...prev,
-          [otherUser.id]: false,
-        };
-      });
-    } catch (err) {
-      console.log(err);
     }
   };
 

@@ -7,6 +7,7 @@ import { useSocket } from "@/contexts/socket";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import VideoControls from "./video-controls";
+import NoteBubble from "./note-bubble";
 
 import { Profile } from "@prisma/client";
 
@@ -15,6 +16,11 @@ interface VideoScreenProps {
   currentMember: Profile;
   otherMember: Profile;
 }
+
+type notes = {
+  content: string;
+  sender: Profile;
+};
 
 const ICE_SERVERS = {
   iceServers: [
@@ -45,6 +51,7 @@ export default function VideoScreen({
   const [cameraActive, setCameraActive] = useState(true);
   const [micActive, setMicActive] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [notesReceived, setNotesReceived] = useState<notes[]>([]);
 
   const VIDEO_CONSTRAINTS = {
     audio: {
@@ -233,10 +240,10 @@ export default function VideoScreen({
       const tracks = stream.getTracks();
       // console.log(tracks);
 
-      for(const track of tracks) {
+      for (const track of tracks) {
         track.stop();
       }
-      videoRefSelf.current.srcObject = null; 
+      videoRefSelf.current.srcObject = null;
     }
 
     if (videoRefOther.current?.srcObject) {
@@ -370,6 +377,17 @@ export default function VideoScreen({
       socket.on("offer", handleReceivedOffer);
       socket.on("answer", handleAnswer);
       socket.on("ice-candidate", handleNewIceCandidateMsg);
+
+      socket.on(
+        `note:${conversationId}`,
+        (data: { content: string; sender: Profile }) => {
+          setNotesReceived((prev) => {
+            let arr = [...prev];
+            arr.push(data);
+            return arr;
+          });
+        }
+      );
     }
 
     return () => {
@@ -388,16 +406,42 @@ export default function VideoScreen({
     };
   }, [conversationId, socket]);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (notesReceived.length > 0) {
+        setNotesReceived((prevMessages) => prevMessages.slice(1));
+      }
+    }, 15000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [notesReceived]);
+
   return (
     <div className="min-h-[80svh] w-full  flex-grow flex-col gap-4 items-center">
       <div className="flex flex-col md:!flex-row gap-4 h-full w-full items-center relative justify-center">
-        <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
+        <div className="basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent relative">
           <video
             autoPlay
             muted
             ref={videoRefSelf}
             className="w-full h-full object-cover rounded-xl scale-x-[-1]"
           />
+
+          <div className="absolute top-8 left-5 flex flex-col gap-y-4">
+            {notesReceived.map((note, index) => (
+              <NoteBubble
+                self={currentMember.id === note.sender.id}
+                key={index}
+                text={note.content}
+                className={`${
+                  currentMember.id !== note.sender.id ? "hidden" : "flex"
+                }`}
+              />
+            ))}
+          </div>
+
           {/* {cameraActive ? (
             <video
               autoPlay
@@ -415,13 +459,26 @@ export default function VideoScreen({
             </div>
           )} */}
         </div>
-        <div className="w-full md:basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent">
+        <div className="w-full md:basis-1/2 h-full border rounded-xl shadow-md bg-white dark:bg-transparent relative">
           <video
             autoPlay
             muted
             ref={videoRefOther}
             className="w-full h-full object-cover rounded-xl scale-x-[-1]"
           />
+
+          <div className="absolute top-8 left-5 flex flex-col gap-y-4">
+            {notesReceived.map((note, index) => (
+              <NoteBubble
+                self={currentMember.id === note.sender.id}
+                key={index}
+                text={note.content}
+                className={`${
+                  currentMember.id !== note.sender.id ? "flex" : "hidden"
+                }`}
+              />
+            ))}
+          </div>
           {/* {cameraActive ? (
             <video
               autoPlay
