@@ -411,7 +411,7 @@ export default function VideoScreen({
       if (notesReceived.length > 0) {
         setNotesReceived((prevMessages) => prevMessages.slice(1));
       }
-    }, 15000);
+    }, 8000);
 
     return () => {
       clearInterval(timer);
