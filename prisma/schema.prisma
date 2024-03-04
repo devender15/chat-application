@@ -16,16 +16,17 @@ model Profile {
   imageUrl String @db.Text
   email String @db.Text
 
-  // groups Group[]
-
   friendRequestSent FriendRequest[] @relation("FriendRequestSender")
   friendRequestReceived FriendRequest[] @relation("FriendRequestReceiver")
 
   currentUser Friend[] @relation("currentUser")
   friends Friend[] @relation("Friendship")
+  groups Group[] @relation("GroupMembers")
 
   conversationInitiated Conversation[] @relation("MemberOne")
   conversationReceived Conversation[] @relation("MemberTwo")
+
+  admin Group[] @relation("GroupAdmin")
 
   directMessages DirectMessage[]
 
@@ -107,77 +108,18 @@ model DirectMessage {
   @@index([conversationId])
 }
 
-// enum MemberRole {
-//   ADMIN
-//   GUEST
-// }
+model Group {
+  id String @id @default(uuid())
+  name String
+  description String @db.Text
+  
+  adminId String
+  admin Profile @relation("GroupAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  members Profile[] @relation("GroupMembers")
 
-// model Member {
-//   id String @id @default(uuid())
-//   role MemberRole @default(GUEST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-//   profileId String
-//   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-//   message Message[]
-//   directMessages DirectMessage[]
-//   friends Friend[]
-
-//   conversationsInitiated Conversation[] @relation("MemberOne")
-//   conversationReceived Conversation[] @relation("MemberTwo")
-
-//   // now storing all the friends of this user in a single field
-//   friendsList Friend[] @relation("Friendship")
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([profileId])
-// }
-
-// model Group {
-//   id String @id @default(uuid())
-//   name String
-//   imageUrl String @db.Text
-
-//   profileId String
-//   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([profileId])
-// }
-
-// model Message {
-//   id String @id @default(uuid())
-//   content String @db.Text
-
-//   fileUrl String? @db.Text
-
-//   memberId String
-//   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
-
-//   deleted Boolean @default(false)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([memberId])
-// }
-
-
-// model Friend {
-//   id String @id @default(uuid())
-
-//   userId String
-//   member Member @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   friends Member[] @relation("Friendship")
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([userId])
-// }
-
+  @@index([adminId])
+  @@unique([adminId])
+}
