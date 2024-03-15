@@ -1,11 +1,15 @@
 import { MessageSquare } from "lucide-react";
+import { intitalProfile } from "@/lib/initial-profile";
 
-export default function Home() {
+export default async function Home() {
+
+  const profile = await intitalProfile();
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-y-4">
       <div className="flex flex-col items-center">
         <MessageSquare size={100} className="animate-pulse" />
-        <h1 className="text-3xl font-semibold">Start Chatting</h1>
+        <h1 className="text-3xl font-semibold">Start Chatting, {profile?.name}</h1>
       </div>
       <div>
         <p className="text-gray-500">
