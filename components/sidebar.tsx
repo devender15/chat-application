@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "./ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiNotification } from "react-icons/bi";
 import {
@@ -21,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThreeDots } from "react-loader-spinner";
 import FriendsLoader from "./skeletons/friendsLoader";
@@ -28,8 +29,13 @@ import FriendsLoader from "./skeletons/friendsLoader";
 import { useStateContext } from "@/contexts/state-context";
 
 export default function Sidebar() {
-  const { friendRequests, friendsList, usersTyping, fetchingFriends } =
-    useStateContext();
+  const {
+    friendRequests,
+    friendsList,
+    usersTyping,
+    fetchingFriends,
+    setCreateGroupModal,
+  } = useStateContext();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -90,14 +96,27 @@ export default function Sidebar() {
               </Button>
             </Link>
           </div>
+          <Separator />
           <div className="px-3 py-2">
-            <h2
-              className={`mb-2 py-4 ${
-                isCollapsed ? "text-sm" : "text-lg"
-              } font-semibold tracking-tight`}
-            >
-              Friends ( {friendsList.length} )
-            </h2>
+            <div className="flex items-center gap-x-2 mb-2">
+              <h2
+                className={`py-4 ${
+                  isCollapsed ? "text-sm" : "text-lg"
+                } font-semibold tracking-tight`}
+              >
+                Friends ( {friendsList.length} )
+              </h2>
+              <Button
+                onClick={() => {
+                  setCreateGroupModal(false);
+                  setCreateGroupModal(true);
+                }}
+                variant="link"
+                className="flex items-center gap-x-2"
+              >
+                Create Group <Plus size={15} />
+              </Button>
+            </div>
             <div className="space-y-1">
               <ScrollArea className="h-[400px] w-full">
                 {fetchingFriends ? (

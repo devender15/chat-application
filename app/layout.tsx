@@ -8,7 +8,7 @@ import { StateContextProvider } from "@/contexts/state-context";
 import { Toaster } from "@/components/ui/toaster";
 // import { dark, neobrutalism  } from "@clerk/themes";
 
-import MessageFileModal from "@/components/modals/message-file.modal";
+import ModalProvider from "@/providers/modal-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,7 +36,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system">
             <SocketContextProvider>
               <StateContextProvider>
-                <MessageFileModal />
+                <ModalProvider />
                 {children}
               </StateContextProvider>
             </SocketContextProvider>

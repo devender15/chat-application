@@ -121,5 +121,4 @@ model Group {
   updatedAt DateTime @updatedAt
 
   @@index([adminId])
-  @@unique([adminId])
 }

@@ -16,7 +16,7 @@ import { useSocket } from "./socket";
 
 import { handleFetchFriendRequests } from "@/lib/utils";
 
-import { DirectMessage } from "@prisma/client";
+import { DirectMessage, Group } from "@prisma/client";
 
 type DirectMessageState = Record<string, DirectMessage[]>;
 
@@ -33,11 +33,15 @@ type StateContextType = {
   editableChat: Record<string, string>;
   setEditableChat: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   messagesSeen: Record<string, boolean>;
-  setMessagesSeen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setMessagesSeen: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
   fileMessageModal: Record<string, string | Record<string, any>>;
   setFileMessageModal: React.Dispatch<
     React.SetStateAction<Record<string, string | Record<string, any>>>
   >;
+  createGroupModal: boolean;
+  setCreateGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const StateContext = createContext({} as StateContextType);
@@ -56,6 +60,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
     apiUrl: "",
     query: {},
   });
+  const [createGroupModal, setCreateGroupModal] = useState<boolean>(false);
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -85,6 +90,17 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
           description: `${data.email} has accepted your friend request!`,
         });
       });
+
+      socket.on(
+        `groupCreateUpdate:${user.id}`,
+        ({ message, group }: { message: string; group: Group }) => {
+          toast({
+            variant: "default",
+            description: message,
+          });
+          console.log(group);
+        }
+      );
     }
   }, [user, socket]);
 
@@ -118,6 +134,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setFileMessageModal,
         messagesSeen,
         setMessagesSeen,
+        createGroupModal,
+        setCreateGroupModal,
       }}
     >
       {children}

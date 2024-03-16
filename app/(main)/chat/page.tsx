@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default function Page() {
 
-
+  // redirect to home page because this page isn't accessible 
   redirect("/");
 
   return (
