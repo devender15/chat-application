@@ -14,7 +14,7 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { useSocket } from "./socket";
 
-import { handleFetchFriendRequests } from "@/lib/utils";
+import { handleFetchFriendRequests, handleFetchGroups } from "@/lib/utils";
 
 import { DirectMessage, Group } from "@prisma/client";
 
@@ -25,6 +25,8 @@ type StateContextType = {
   setFriendRequests: React.Dispatch<React.SetStateAction<Profile[]>>;
   friendsList: Profile[];
   setFriendsList: React.Dispatch<React.SetStateAction<Profile[]>>;
+  groupsList: Group[];
+  setGroupsList: React.Dispatch<React.SetStateAction<Group[]>>;
   fetchingFriends: boolean;
   directMessages: DirectMessageState;
   setDirectMessages: React.Dispatch<React.SetStateAction<DirectMessageState>>;
@@ -49,6 +51,7 @@ export const StateContext = createContext({} as StateContextType);
 export function StateContextProvider({ children }: { children: ReactNode }) {
   const [friendRequests, setFriendRequests] = useState<Profile[]>([]);
   const [friendsList, setFriendsList] = useState<Profile[]>([]);
+  const [groupsList, setGroupsList] = useState<Group[]>([]);
   const [fetchingFriends, setFetchingFriends] = useState<boolean>(true);
   const [directMessages, setDirectMessages] = useState<DirectMessageState>({});
   const [messagesSeen, setMessagesSeen] = useState<Record<string, boolean>>({});
@@ -70,6 +73,7 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
     if (user && socket) {
       handleFetchFriendRequests(setFriendRequests);
       handleGetFriendsList();
+      handleFetchGroups(setGroupsList);
 
       socket.on(`sendFriendRequest:${user.id}`, (data: Profile) => {
         setFriendRequests((prev) => [...prev, data]);
@@ -94,11 +98,15 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
       socket.on(
         `groupCreateUpdate:${user.id}`,
         ({ message, group }: { message: string; group: Group }) => {
+
           toast({
             variant: "default",
             description: message,
           });
+
           console.log(group);
+
+          setGroupsList((prev) => [group, ...prev]);
         }
       );
     }
@@ -123,6 +131,8 @@ export function StateContextProvider({ children }: { children: ReactNode }) {
         setFriendRequests,
         friendsList,
         setFriendsList,
+        groupsList,
+        setGroupsList,
         fetchingFriends,
         directMessages,
         setDirectMessages,

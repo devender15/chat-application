@@ -47,12 +47,14 @@ export default async function handler(
         },
     });
 
+    console.log(group);
+
     members.forEach(member => {
         const groupNotificationKey = `groupCreateUpdate:${member.userId}`;
         res?.socket?.server?.io?.emit(groupNotificationKey, { message: `${profile.name} added you to ${name}!`, group });
     })    
 
-    res.status(200).json({ message: "Group created successfully!" });
+    res.status(200).json({ message: "Group created successfully!", group });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong!" });

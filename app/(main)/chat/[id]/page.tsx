@@ -14,6 +14,7 @@ interface MemberIdPageProps {
 }
 
 export default async function Page({ params }: MemberIdPageProps) {
+
   const profile = await currentProfile();
 
   if (!profile) {
@@ -34,13 +35,13 @@ export default async function Page({ params }: MemberIdPageProps) {
   });
 
   if (!friend) {
-    redirect("/chat");
+    redirect("/");
   }
 
   const conversation = await getOrCreateConversation(profile.id, params.id);
 
   if (!conversation) {
-    redirect("/chat");
+    redirect("/");
   }
 
   const { memberOne, memberTwo } = conversation;

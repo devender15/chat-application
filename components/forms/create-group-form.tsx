@@ -27,7 +27,7 @@ interface CreateGroupFormProps {
 export default function CreateGroupForm({
   selectedFriends,
 }: CreateGroupFormProps) {
-  const { setCreateGroupModal } = useStateContext();
+  const { setCreateGroupModal, setGroupsList } = useStateContext();
 
   const { toast } = useToast();
 
@@ -55,6 +55,8 @@ export default function CreateGroupForm({
         variant: "default",
         description: response.data.message,
       });
+
+      setGroupsList((prev) => [...prev, response.data.group]);
 
       setCreateGroupModal(false);
     } catch (error) {

@@ -34,6 +34,7 @@ export default function Sidebar() {
     friendsList,
     usersTyping,
     fetchingFriends,
+    groupsList,
     setCreateGroupModal,
   } = useStateContext();
   const pathname = usePathname();
@@ -97,14 +98,15 @@ export default function Sidebar() {
             </Link>
           </div>
           <Separator />
+
           <div className="px-3 py-2">
             <div className="flex items-center gap-x-2 mb-2">
               <h2
                 className={`py-4 ${
-                  isCollapsed ? "text-sm" : "text-lg"
+                  isCollapsed ? "text-sm" : "text-base"
                 } font-semibold tracking-tight`}
               >
-                Friends ( {friendsList.length} )
+                Groups ( {groupsList.length} )
               </h2>
               <Button
                 onClick={() => {
@@ -118,11 +120,59 @@ export default function Sidebar() {
               </Button>
             </div>
             <div className="space-y-1">
-              <ScrollArea className="h-[400px] w-full">
+                <ScrollArea className="h-[250px] w-full">
+                  {groupsList.length === 0 ? (
+                    <p className="text-sm">
+                      No groups found :/
+                    </p>
+                  ) : (
+                    groupsList.map((group) => (
+                      <Link href={`/chat/${group.id}`} key={group.id}>
+                        <Button
+                          variant="secondary"
+                          className={`w-full justify-start flex items-center gap-x-3 h-16 mb-3`}
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={""}
+                              className="h-10 w-10"
+                            />
+                            <AvatarFallback>{group.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          {!isCollapsed && (
+                            <div className="flex flex-col items-start gap-y-1">
+                              <span className="text-sm">
+                                {group.name.length > 16
+                                  ? group.name.substring(0, 16)
+                                  : group.name}
+                              </span>
+                            </div>
+                          )}
+                        </Button>
+                      </Link>
+                    ))
+                  )}
+                </ScrollArea>
+            </div>
+          </div>
+
+          <Separator />
+          <div className="px-3 py-1">
+            <h2
+              className={`py-2 ${
+                isCollapsed ? "text-sm" : "text-base"
+              } font-semibold tracking-tight`}
+            >
+              Friends ( {friendsList.length} )
+            </h2>
+            <div className="space-y-1">
+              <ScrollArea className="h-[300px] w-full">
                 {fetchingFriends ? (
                   <FriendsLoader />
                 ) : friendsList.length === 0 ? (
-                  <p>Awww... you don&apos;t have any friends :/</p>
+                  <p className="text-sm">
+                    Awww... you don&apos;t have any friends :/
+                  </p>
                 ) : (
                   friendsList.map((friendObj) => (
                     <Link href={`/${mode}/${friendObj.id}`} key={friendObj.id}>
